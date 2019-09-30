@@ -19,7 +19,7 @@ const os = require('os')
 // System Information
 const si = require('systeminformation')
 
-const electronVibrancy = require('electron-vibrancy')
+// const electronVibrancy = require('electron-vibrancy')
 
 const ETimer = require('./timer')
 
