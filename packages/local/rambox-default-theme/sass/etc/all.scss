@@ -10,11 +10,15 @@ $url-input-font-size: 11pt;
 
 $base-color: #2E658E;
 // $font-family: 'Roboto', sans-serif;
-$font-family: 'Helvetica Neue';
+$font-family: 'Helvetica Neue', 'Segoe UI', 'sans-serif';
 $include-ie: false;
 $include-ff: false;
 $include-safari: false;
 $include-opera: false;
+
+body {
+	font-family: $font-family;
+}
 
 // Close button override
 .x-tool-close {
@@ -316,7 +320,7 @@ body::before {
 		color: #787B7E;
 		font-size: 10pt;
 
-		font-family: "Helvetica Neue";
+		font-family: $font-family;
 
 		margin-bottom: 0;
 	}
@@ -351,7 +355,7 @@ body::before {
 	.x-toolbar-text-default {
 		color: rgb(49, 49, 49) !important;
 		font-weight: normal;
-		font-family: "Helvetica Neue";
+		font-family: $font-family;
 	}
 }
 
@@ -377,13 +381,13 @@ body::before {
 }
 
 .x-window-header-default-top .x-title-text-default {
-	font-family: "Helvetica Neue" !important;
+	font-family: $font-family !important;
 	font-weight: 500;
 	color: #A9A9A9;
 }
 
 .x-window-header-title-default {
-	font-family: "Helvetica Neue";
+	font-family: $font-family;
 }
 
 .x-toolbar-footer {
@@ -411,12 +415,12 @@ body::before {
 
 .main-submit .x-btn-inner, .main-cancel .x-btn-inner {
 	font-size: 12pt;
-	font-family: "Helvetica Neue";
+	font-family: $font-family;
 
 	font-weight: 500;
 }
 .x-btn-inner-default-small {
-	font-family: "Helvetica Neue" !important;
+	font-family: $font-family !important;
 }
 // .main-submit .x-btn-inner:hover {
 // 	text-decoration: none;
@@ -456,7 +460,7 @@ body::before {
 }
 
 .urlField .x-form-text-default {
-	font-family: "Helvetica Neue" !important;
+	font-family: $font-family !important;
 
 	color: #3F4244;
 
@@ -742,7 +746,7 @@ body::before {
 }
 
 .upgrade-popup .popup-text {
-	font-family: "Helvetica Neue"
+	font-family: $font-family
 }
 
 .upgrade-popup .popup-spinner-title {
@@ -818,7 +822,7 @@ body::before {
 
 .activate-button .x-btn-inner {
 	font-size: 14pt !important;
-	font-family: "Helvetica Neue";
+	font-family: $font-family;
 
 	font-weight: 500;
 }
@@ -859,7 +863,7 @@ body::before {
 }
 
 .about-desc {
-	font-family: "Helvetica Neue";
+	font-family: $font-family;
 	color: #4B4F53;
 
 	font-size: 11pt;
@@ -882,7 +886,7 @@ body::before {
 .feedback_url {
 	color: #081F37;
 
-	font-family: "Helvetica Neue";
+	font-family: $font-family;
 	font-weight: 400;
 	font-size: 12pt;
 
