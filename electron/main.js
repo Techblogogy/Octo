@@ -564,21 +564,21 @@ ipcMain.on('relaunchApp', function(event) {
 	app.exit(0);
 });
 
-const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
-	// Someone tried to run a second instance, we should focus our window.
-	if (mainWindow) {
-		if (mainWindow.isMinimized()) mainWindow.restore();
-		mainWindow.focus();
-		mainWindow.show();
-		mainWindow.setSkipTaskbar(false);
-		if (app.dock && app.dock.show) app.dock.show();
-	}
-});
+// const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
+// 	// Someone tried to run a second instance, we should focus our window.
+// 	if (mainWindow) {
+// 		if (mainWindow.isMinimized()) mainWindow.restore();
+// 		mainWindow.focus();
+// 		mainWindow.show();
+// 		mainWindow.setSkipTaskbar(false);
+// 		if (app.dock && app.dock.show) app.dock.show();
+// 	}
+// });
 
-if (shouldQuit) {
-	app.quit();
-	return;
-}
+// if (shouldQuit) {
+// 	app.quit();
+// 	return;
+// }
 
 // Code for downloading images as temporal files
 // Credit: Ghetto Skype (https://github.com/stanfieldr/ghetto-skype)
