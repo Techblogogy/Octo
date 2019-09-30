@@ -275,7 +275,7 @@ ipcMain.on('timerReset', function () {
 function createWindow () {
 	// Create the browser window using the state information
 	mainWindow = new BrowserWindow({
-		 title: 'Rambox'
+		 title: 'Octo'
 		,icon: __dirname + '/../resources/Icon.ico'
 		,backgroundColor: '#FFF'
 		,x: config.get('x')
@@ -297,6 +297,7 @@ function createWindow () {
 		,titleBarStyle: 'hidden'
 		,transparent: true
 		,vibrancy: 'dark'
+		,resizable: true,
 	});
 
 	if ( !config.get('start_minimized') && config.get('maximized') ) mainWindow.maximize();
@@ -309,7 +310,8 @@ function createWindow () {
 	// and load the index.html of the app.
 	mainWindow.loadURL('file://' + __dirname + '/../index.html');
 
-	Menu.setApplicationMenu(appMenu);
+	mainWindow.setMenu(null);
+	// Menu.setApplicationMenu(appMenu);
 
 	tray.create(mainWindow, config);
 
