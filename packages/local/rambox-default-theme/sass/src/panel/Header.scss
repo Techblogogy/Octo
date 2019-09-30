@@ -1,0 +1,95 @@
+
+// .x-panel-header-default {
+//     background-color: #162732 !important;
+// }
+
+.x-panel-header-default {
+    background-color: #081F37 !important;
+
+    // -webkit-app-region: no-drag;
+}
+
+.sel-main-title {
+    // font-size: 30pt;
+    // font-weight: 400;
+    font-weight: 600;
+    // color: white !important;
+}
+
+.sel-sub-title { 
+    margin-top: 25px;
+    color: #9DA8BF;
+    font-weight: 400;
+}
+
+.main-panel .x-panel-header {
+    font-size: 24pt !important;
+
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+
+    left: auto !important;
+}
+
+.main-panel .x-form-text-default {
+    padding: 10px 20px;
+    font-size: 12pt;
+    font-weight: 400;
+
+    // color: #D7DFE6; //rgba(255, 255, 255, 0.9);
+    color: #081F37;
+    background: none !important;
+}
+
+.x-form-trigger-default {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.x-form-search-trigger {
+    background-image: url(tools/search.png);
+    background-size: 20px;
+}
+
+.x-form-search-trigger.x-form-trigger-default.x-form-trigger-focus,
+.x-form-search-trigger.x-form-trigger-default.x-form-trigger-over,
+
+.x-form-clear-trigger.x-form-trigger-default.x-form-trigger-focus,
+.x-form-clear-trigger.x-form-trigger-default.x-form-trigger-over {
+    background-position: 0 center !important;
+}
+
+.x-form-clear-trigger {
+    background-image: url(tools/clear.png);
+    background-size: 18px;
+}
+
+.main-panel .x-form-field::-webkit-input-placeholder {
+    color: #858F9B;
+    // color: #081F37;
+}
+
+.main-panel .x-form-trigger-wrap {
+    background-color: white !important;
+
+    // border-color: #34455a !important; // #D7DFE6; // #E1E7EC;
+    border-color: #D7DFE6 !important; 
+    border-width: 1px;
+    padding: 0 6px 1px 1px;
+
+    border-radius: 5px;
+}
+
+.main-type-title {
+    font-weight: bold;
+    font-family: "Helvetica Neue";
+    font-size: 11pt;
+
+    // border-bottom: 1px solid #E1E7EC;
+
+    padding: 7px 30px;
+    margin: 7px 0;
+    // padding-bottom: 0px;
+
+    color: #4C5054;
+}

@@ -1,0 +1,126 @@
+.x-tab-bar-default {
+	// background: none !important;
+	background-color: rgba(6,30,48,0.2);
+
+	// -webkit-app-region: drag;
+}
+
+.x-tab {
+	// -webkit-app-region: no-drag;
+	margin: 0
+}
+
+.x-tab-bar-top {
+	.x-tab-bar-body {
+		padding: 8px 0 0 0 !important;
+	}
+	.x-tab-bar-strip {
+		position: relative !important;
+		margin-top: -10px;
+	}
+}
+
+.x-tab-button-center {
+	text-align: left !important;
+	font-family: "Helvetica Neue";
+}
+
+.x-badge[data-badge-text]:after {
+	box-shadow: none;
+	background: none;
+	text-shadow: none;
+
+	top: 15px;
+	right: 13px;
+
+	font-size: 8pt;
+	border-radius: 20px;
+
+	padding: 2px 5px;
+
+	// background-color: #E4714A;
+	background-color: $highlight-color;
+}
+
+.x-tab-inner {
+	font-family: "Helvetica Neue" !important;
+	font-weight: 400;
+	font-size: 12pt;
+
+	color: white;
+}
+
+.x-tab-icon-el-default {
+	margin-right: 10px !important;
+}
+
+.x-tab-default {
+	padding: 13px 20px !important;
+	padding-right: 50px !important;
+	border-radius: 0;
+}
+.x-tab-default-left {
+	background: none;
+}
+
+.b-icon {
+	// bottom: 0 !important;
+}
+// .b-icon.x-tab-default {
+// 	border: none;
+// 	background: none;
+
+// 	// width: 65px !important;
+// }
+// .b-icon.x-tab-active {
+// 	border: none !important;
+// 	background: none !important;
+// }
+
+// .n-opacity .x-tab-icon-el {
+.b-icon .x-tab-icon-el, .b-icon .x-tab-inner-default {
+	opacity: 0.5;
+}
+
+// .x-tab.x-tab-over.x-tab-default.b-icon {
+// 	background: none !important;
+// }
+
+.x-tab.x-tab-over.x-tab-default.b-icon .x-tab-icon-el, 
+.x-tab.x-tab-over.x-tab-default.b-icon .x-tab-inner-default {
+	opacity: 0.8;
+}
+
+.x-tab.x-tab-active.x-tab-default.b-icon .x-tab-icon-el, 
+.x-tab.x-tab-active.x-tab-default.b-icon .x-tab-inner-default {
+	opacity: 1;
+}
+
+.x-tab.active.x-tab-default.b-icon .x-tab-icon-el, 
+.x-tab.active.x-tab-default.b-icon .x-tab-inner-default {
+	opacity: 1;
+}
+
+.x-tab.x-tab-active.x-tab-default {
+	border: none;
+	background-color: rgba(0,0,0,0.2);
+}
+.x-tab-over.x-tab-default {
+	border: none !important;
+	background-color: rgba(0,0,0,0.2) !important;
+}
+.x-tab.x-tab-active.x-tab-default .x-tab-inner-default {
+	color: white;
+}
+
+.upgrade-icon {
+	// background-color: #E3704E !important;
+	background-color: $highlight-color !important;
+	border-top-left-radius: 5px;
+}
+
+.x-tab.x-tab-over.x-tab-default.upgrade-icon {
+	// background-color: #E45A34 !important;
+	background-color: darken($highlight-color, 10%) !important;
+	// opacity: 0.8;
+}
