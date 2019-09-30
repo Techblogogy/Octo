@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "start": "electron electron/main.js",
+    "start": "electron --inspect electron/main.js",
     "start:debug": "electron electron/main.js --enable-logging",
     "test": "./node_modules/.bin/mocha test/tests/**/*.spec.js",
     "sencha:clean": "rm -rf ./build/production",
@@ -95,8 +95,8 @@
     "chai": "3.5.0",
     "crowdin": "1.0.0",
     "csvjson": "4.3.3",
-    "electron": "1.7.5",
-    "electron-builder": "^17.10.0",
+    "electron": "^4.1.0",
+    "electron-builder": "^21.2.0",
     "electron-builder-squirrel-windows": "15.0.0",
     "electron-packager": "^9.1.0",
     "electron-squirrel-startup": "^1.0.0",
@@ -106,8 +106,8 @@
   "dependencies": {
     "@exponent/electron-cookies": "2.0.0",
     "auto-launch-patched": "5.0.2",
-    "electron-config": "0.2.1",
-    "electron-is-dev": "^0.1.2",
+    "electron-config": "^2.0.0",
+    "electron-is-dev": "^1.1.0",
     "electron-open-link-in-browser": "^1.0.2",
     "mime": "^1.4.0",
     "rimraf": "2.6.1",
