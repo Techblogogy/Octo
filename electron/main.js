@@ -451,55 +451,6 @@ ipcMain.on('resetNotificationTimer', function (e) {
 	timer.fullReset()
 })
 
-ipcMain.on('getAFFID', function (e) {
-
-	e.returnValue = {
-		e: undefined,
-		out: '',
-		err: undefined,
-	}
-
-	// // Excract file from ASAR
-	// var dc = fs.readFileSync(__dirname+'/../resources/decrypt.sh')
-	// fs.writeFileSync('/tmp/decrypt.sh', dc)
-
-	// const exec = require('child_process').execFile;
-	// var getaffid = exec('sh', ['/tmp/decrypt.sh'],
-	// 	(error, stdout, stderr) => {
-
-	// 		fs.unlinkSync("/tmp/decrypt.sh")
-
-	// 		try {
-	// 			var installInfo = JSON.parse(stdout)
-	// 			e.returnValue = installInfo.affid
-	// 			return;
-	// 		} catch (err) {
-	// 			console.log('error getting affid', err)
-	// 			// e.returnValue = {
-	// 			// 	e: err,
-	// 			// 	s: stdout
-	// 			// }
-	// 		}
-
-	// 		if (error !== null) {
-	// 			// e.returnValue = {
-	// 			// 	e: error,
-	// 			// 	s: stdout
-	// 			// }
-	// 			console.log(`exec error: ${error}`);
-	// 		}
-
-	// 		e.returnValue = {
-	// 			e: error,
-	// 			out: stdout,
-	// 			err: stderr,
-	// 		}
-
-	// 		// e.returnValue = 0;
-	// 	});
-
-})
-
 ipcMain.on('openExternalLink', function (e, url) {
 	shell.openExternal(url);
 })

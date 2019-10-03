@@ -6,8 +6,6 @@
 .sass_cache/
 /dist
 
-/Installers/*/build
-/Tools/s3_upload_manual.m4
 
 # OS generated files #
 ######################

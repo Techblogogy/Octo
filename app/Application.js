@@ -339,15 +339,6 @@ Ext.define('Rambox.Application', {
 			}
 		})
 
-		// Get/Save AFFID
-		if (!localStorage.getItem('affid')) {
-			let AFFID = ipc.sendSync('getAFFID') // Request system info from electron
-			console.log(AFFID);
-
-			localStorage.setItem('affid', AFFID)
-			// ga_storage._trackEvent('Application', 'AffID', AFFID)
-		}
-
 		// Remove spinner
 		Ext.get('spinner').destroy();
 
