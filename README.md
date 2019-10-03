@@ -1,7 +1,6 @@
-# All-in-one messenger
+# Octo
 
-Project has been cloned from Rambox 
-
+All-in-one messenger. Forked from [Rambox](https://github.com/saenzramiro/rambox).
 
 ## Getting Started
 
@@ -20,7 +19,7 @@ Project has been cloned from Rambox
 
 #### Quickstart:
 
-1. `git clone gitlab@gitlab.zeo.lcl:web-team/unifieder.git`
+1. `git clone https://github.com/Techblogogy/Octo.git`
 2. `npm install`
 3. Configure `env-sample.js` and rename it to `env.js`.
 4. `npm run sencha:compile`
@@ -32,15 +31,14 @@ These instructions were tested with Ubuntu 17.04.
 1. Install dependencies: `sudo apt install nodejs-legacy npm git`
 2. Build and install electron: `sudo npm install electron-prebuilt -g`
 3. Install Sencha Cmd (non-free): https://www.sencha.com/products/extjs/cmd-download/
-4. Clone repository: `git clone gitlab@gitlab.zeo.lcl:web-team/unifieder.git`
+4. Clone repository: `git clone https://github.com/Techblogogy/Octo.git`
 5. Install npm dependencies: `npm install`
 6. Configure `env-sample.js` and rename it to `env.js`.
-7. Patch scripts: `npm run scripts:patch`
-8. Compile: `npm run sencha:compile`
-9. Start program: `npm start`
+7. Compile: `npm run sencha:compile`
+8. Start program: `npm start`
 
 
-Source Licence !!!
--------------------
+Licence
+-------
 
 [GNU GPL v3](https://github.com/saenzramiro/rambox/LICENSE)
