@@ -249,11 +249,9 @@ function timeNotification() {
 
 		})
 		n.show()
-		mainWindow.webContents.send('sendGA', 'Shown Notification', msg.id)
 
 		n.on('click', function () {
 			mainWindow.focus()
-			mainWindow.webContents.send('sendGA', 'Click Notification', msg.id)
 		})
 
 		n.on('close', function () {

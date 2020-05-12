@@ -26,8 +26,6 @@ Ext.define('Rambox.view.popup.Popup', {
     // ,bodyPadding: 20
 
     ,initComponent: function() {
-        ga_storage._trackPageview('/upgrade', "Upgrade To PRO");
-
         console.log(this.record)
 
         // this.title = "Upgrade To Premium";

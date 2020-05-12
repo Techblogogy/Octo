@@ -18,8 +18,6 @@ Ext.define('Rambox.view.main.MainController', {
 			return;
 		}
 
-		ga_storage._trackPageview('/'+newTab.title, newTab.title);
-
 		if (
 			newTab.id === 'settingsTab' || 
 			newTab.id === 'notificationsTab' || 
@@ -207,13 +205,6 @@ Ext.define('Rambox.view.main.MainController', {
 				return false
 			}
 		})
-
-		// Track search result
-		var searchField = Ext.getCmp('main-search-field')
-		var searchValLen = searchField.getValue().length
-		
-		if (searchValLen > 0)
-			ga_storage._trackEvent('Application', 'Search', rc.name);
 
 		/**
 		 * Check if exceded messanger limits
@@ -404,9 +395,6 @@ Ext.define('Rambox.view.main.MainController', {
 	,dontDisturb: function(enabled) {
 		// console.info('Dont Disturb:', btn.pressed ? 'Enabled' : 'Disabled');
 		console.info('Dont Disturb:', enabled ? 'Enabled' : 'Disabled');
-
-		// Google Analytics Event
-		ga_storage._trackEvent('Application', "Don't Disturb", ( enabled ? 'on' : 'off' ));
 
 		Ext.Array.each(Ext.getStore('Services').collect('id'), function(serviceId) {
 			// Get Tab
@@ -616,12 +604,7 @@ Ext.define('Rambox.view.main.MainController', {
 		}
 	}
 
-	,showDonate: function( btn ) {
-		Tooltip.API.show('zxzKWZfcmgRtHXgth');
-	},
-
-
-	notButton: function (btn) {
+	,notButton: function (btn) {
 
 		console.log('Settings Click')
 	},

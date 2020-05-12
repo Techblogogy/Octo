@@ -131,10 +131,6 @@ Ext.define('Rambox.view.add.AddController', {
 				}
 			};
 
-			if (win.record.getData('type') === "custom") {
-				ga_storage._trackEvent('Application', 'Add Customer Service', service.url)
-			}
-
 			// if ( formValues.align === 'left' ) {
 			var tbfill = Ext.cq1('app-main').getTabBar().down('tbfill');
 			// var tbfill = Ext.cq1('app-main').getTabBar().up('ramboxTab');

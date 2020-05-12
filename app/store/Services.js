@@ -82,62 +82,6 @@ const settings = {
 
 			,header: { padding: "23 30" }
 
-			,tools: [
-				
-				{
-					xtype: 'container',
-					layout: {
-						// type: 'vbox',
-						type: 'hbox',
-						align: 'right',
-						pack: 'end',
-					},
-
-					cls: "social-container",
-
-					items: [
-						{
-							type: "component",
-							html: '<h3 class="sel-sub-title" style="margin-left: 0px; margin-top: 0">Leave Feedback:</h3>',
-						},
-
-						{
-							type: "component",
-							html: '<a target="_blank" href="https://docs.google.com/forms/d/e/1FAIpQLSdVjkQsxwIXkffYXvlBfzTkhhyp5lgAL9vra_AfapwHl1P6bw/viewform"><img class="social-icon" src="resources/tools/feedback.png"></a>',
-						},
-
-						{
-							type: "component",
-							html: '<h3 class="sel-sub-title" style="margin-left: 50px; margin-top: 0">Share app:</h3>',
-						},
-						{
-							type: "component",
-							html: '<a target="_blank" href="'+socialEncoded.facebook+'"><img class="social-icon" src="resources/tools/facebook.png"></a>',
-						},
-						{
-							type: "component",
-							html: '<a target="_blank" href="'+socialEncoded.twitter+'"><img class="social-icon" src="resources/tools/twitter.png"></a>',
-						},
-
-						// {
-						// 	xtype: 'container',
-						// 	layout: {
-						// 		type: 'hbox',
-						// 		pack: 'end',
-						// 	},
-							
-						// 	// padding: "0 5 0 0",
-
-						// 	cls: "social-icon-container",
-
-						// 	items: [
-								
-						// 	]
-						// }
-					]
-				}
-			
-			]
 			,columns: [
 				{
 					 xtype: 'templatecolumn'

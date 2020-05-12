@@ -312,10 +312,6 @@ Ext.define('Rambox.Application', {
 
 		});
 
-		ipc.on('sendGA', function (e, action, label) {
-			// ga_storage._trackEvent('Application', action, label)
-		})
-
 		// Handle timer trigger
 		ipc.on('timerTriggered', function(e) {
 			console.log('TIMER TRIGGERED')
