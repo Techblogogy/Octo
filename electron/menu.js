@@ -20,55 +20,14 @@ module.exports = function(config) {
 	const locale = require('../resources/languages/'+config.get('locale'));
 	const helpSubmenu = [
 		{
-			label: `&`+"Octo",//locale['menu.help[0]'],
+			label: `&GitHub`,
 			click() {
-				shell.openExternal('https://octo.bestmacsoft.com');
+				shell.openExternal('https://github.com/Techblogogy/Octo');
 			}
 		},
-		{
-			label: `&Facebook`,
-			click() {
-				shell.openExternal('https://www.facebook.com/octomessenger/');
-			}
-		},
-		{
-			label: `&Twitter`,
-			click() {
-				shell.openExternal('https://twitter.com/Octo_messenger');
-			}
-		},
-		// {
-		// 	label: `&GitHub`,
-		// 	click() {
-		// 		shell.openExternal('');
-		// 	}
-		// },
 		{
 			type: 'separator'
 		},
-		{
-			label: '&'+locale['menu.help[1]'],
-			click() {
-				const body = `
-	<!-- Please describe here your issue and steps to reproduce it. -->
-
-
-
-	<!-- DON'T REMOVE THE FOLLOWING LINES -->
-	-
-	> ${app.getName()} ${app.getVersion()}
-	> Electron ${process.versions.electron}
-	> ${process.platform} ${process.arch} ${os.release()}`;
-
-				shell.openExternal(`https://docs.google.com/forms/d/e/1FAIpQLSdVjkQsxwIXkffYXvlBfzTkhhyp5lgAL9vra_AfapwHl1P6bw/viewform`);
-			}
-		},
-		// {
-		// 	label: `&`+locale['menu.help[2]'],
-		// 	click() {
-		// 		shell.openExternal('https://gitter.im/saenzramiro/rambox');
-		// 	}
-		// },
 		{
 			label: `&Tools`,
 			submenu: [

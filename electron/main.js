@@ -16,12 +16,9 @@ var fs = require("fs");
 const path = require('path');
 // OS
 const os = require('os')
-// System Information
-const si = require('systeminformation')
 
 // const electronVibrancy = require('electron-vibrancy')
 
-const ETimer = require('./timer')
 
 
 // Initial Config
@@ -147,131 +144,6 @@ let mainWindow;
 let isQuitting = false;
 
 
-// Background timer
-let timer = new ETimer([1000 * 60, 1000 * 60 * 15, 1000 * 60 * 120], timeNotification)
-// let timer = new ETimer([1000*5, 1000*15, 1000*120], timeNotification)
-
-// Foreground timer
-let timerFG = new ETimer([1000 * 60 * 3], notificationFG)
-// let timerFG = new ETimer([1000*3], notificationFG)
-
-function timeNotification() {
-
-	mainWindow.webContents.send('getServiceNum')
-	ipcMain.on('serviceNum', function (e, len, aSet, aPlus, activated, pToggle, nCnt, plusClick) {
-
-		// let nId = '0'
-
-		let msg = {
-			id: '',
-			title: "",
-			body: ""
-		}
-
-		switch (len) {
-			case 0:
-				msg = (plusClick) ? {
-					id: '1',
-					title: "Add your first messenger to Octo",
-					body: "There are 89 most popular channels of communication"
-				} : {
-						id: '0',
-						title: "Click on \"Add service\" button",
-						body: "Quickly, add your first messenger to Octo!"
-					}
-
-				// nId = (plusClick) ? '1' : '0'
-				break;
-			case 1:
-				if (aPlus) {
-					// body = "Add second messenger"
-					// nId = '2'
-
-					msg = {
-						id: '2',
-						title: "Time to add your second messenger to Octo",
-						body: "Communicate with everyone in the same window. Become more productive!"
-					}
-				} else return;
-				break;
-			case 2:
-
-				if (aSet) {
-					// body = "Go into settings"
-					// nId = '3'
-
-					msg = {
-						id: '3',
-						title: 'Configure important notifications in Octo',
-						body: 'Stay focused on the important, control everything that can distract you'
-					}
-					break;
-				}
-
-				if (nCnt >= 50 && pToggle) {
-					// body = "Time to upgrade"
-					// nId = '5'
-					msg = {
-						id: '5',
-						title: 'Activate Pro Verison of Octo',
-						body: 'Get unlimited access to all 89 services for lifetime',
-					}
-					break;
-				}
-
-				// TODO: track if settings opened
-				if (nCnt >= 50) {
-					// body = "Add third messenger";
-					// nId = '4'
-
-					msg = {
-						id: '4',
-						title: 'Add rest of messengers into Octo',
-						body: 'Become a productivity guru! Add remaining channels of communication to Octo!'
-					}
-					break;
-				}
-
-				return;
-				break;
-			default:
-				return;
-		}
-
-		const n = new Notification({
-			title: msg.title,
-			body: msg.body,
-
-			actions: {
-				type: 'button',
-				text: "Show"
-			}
-
-		})
-		n.show()
-
-		n.on('click', function () {
-			mainWindow.focus()
-		})
-
-		n.on('close', function () {
-			// return false;
-		})
-
-	})
-}
-
-// Send notification for triggered timer
-function notificationFG() {
-	mainWindow.send('timerTriggered')
-}
-
-ipcMain.on('timerReset', function () {
-	timerFG.stop()
-	timerFG.fullReset()
-	timerFG.start()
-})
-
 function createWindow() {
 	// Create the browser window using the state information
 	mainWindow = new BrowserWindow({
@@ -365,18 +237,6 @@ function createWindow() {
 		if (cmd === 'browser-forward') mainWindow.webContents.executeJavaScript('if(Ext.cq1("app-main")) Ext.cq1("app-main").getActiveTab().goForward();');
 	});
 
-	mainWindow.on('blur', function (e) {
-		console.info('[Event] Focus Lost')
-
-		timerFG.pause()
-		timer.start()
-	});
-	mainWindow.on('focus', function (e) {
-		console.info('[Event] Focus Gained')
-
-		timer.pause()
-		timerFG.start()
-	});
 
 	// Emitted when the window is closed.
 	mainWindow.on('close', function (e) {
@@ -443,11 +303,6 @@ function updateBadge(title) {
 
 	if (messageCount > 0 && !mainWindow.isFocused() && !config.get('dont_disturb') && config.get('flash_frame')) mainWindow.flashFrame(true);
 }
-
-ipcMain.on('resetNotificationTimer', function (e) {
-	console.log('TIMER RESET')
-	timer.fullReset()
-})
 
 ipcMain.on('openExternalLink', function (e, url) {
 	shell.openExternal(url);
@@ -621,45 +476,6 @@ ipcMain.on('toggleWin', function (event, allwaysShow) {
 		mainWindow.show();
 	}
 });
-
-ipcMain.on('getSysInfo', function (e) {
-
-	// Gets OS Related Info
-	si.osInfo(function (osData) {
-
-		// Gets System Info
-		si.system(function (sysData) {
-
-			// Gets network info 
-			si.networkInterfaces(function (netData) {
-
-				// Get default network interface
-				si.networkInterfaceDefault(function (defIface) {
-					console.log("INFO:", osData, sysData, netData, defIface);
-
-					let macAddr = ""
-					netData.forEach(function (i) {
-						if (i.iface === defIface) {
-							macAddr = i.mac
-							return false
-						}
-					});
-
-					// e.sender.send('sysInfo', {
-					e.returnValue = {
-						serial: sysData.serial,
-						modelId: sysData.model,
-						osVersion: osData.release,
-						macAddress: macAddr,
-					}
-				})
-			});
-		});
-	});
-
-
-
-})
 
 ipcMain.on('getDirName', function (e) {
 	e.returnValue = __dirname

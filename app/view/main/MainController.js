@@ -11,17 +11,9 @@ Ext.define('Rambox.view.main.MainController', {
 
 		console.log('[EVENT] onTabChange', newTab);
 		
-		if (newTab.id === 'upgradeTab') {
-			Ext.create('Rambox.view.popup.Popup', {
-				oldTab: oldTab,
-			})
-			return;
-		}
-
 		if (
 			newTab.id === 'settingsTab' || 
 			newTab.id === 'notificationsTab' || 
-			newTab.id === 'upgradeTab' ||
 			newTab.id === 'welcomeTab'
 		) {
 			return;
@@ -29,60 +21,6 @@ Ext.define('Rambox.view.main.MainController', {
 
 		if ( newTab.id === 'ramboxTab' ) {
 
-			console.log('Rambox Tab');
-			
-			
-
-			// // Resets First Time Plus Click Event
-			// if (!localStorage.getItem('plusClicked')) {
-
-			// 	// RESET
-			// 	ipc.send('resetNotificationTimer')
-
-			// 	localStorage.setItem('plusClicked', true)
-
-            //     try {
-            //         ga_storage._trackEvent('Application', 'Get Started', "Add service on Welcome screen ");
-            //         FB.AppEvents.logEvent('Add service on Welcome screen');
-            //     } catch (error) {
-            //         console.log(error)
-            //     }
-			// }
-
-			// Stop Plus timeout
-			if (localStorage.getItem('plusTimeout') == 'true') {
-				// clearTimeout(plusTimeout)
-				localStorage.setItem('plusTimeout', 'false')
-			}
-
-			// Track Appealing Plus Click
-			if (localStorage.getItem('appealingPlus') == 'true') {
-				console.log("Highleted Plus Click")
-
-				// RESET TIMEOUT
-				ipc.send('resetNotificationTimer')
-
-                // try {
-                //     // GA track Plus button clicks
-                //     ga_storage._trackEvent('Application', 'Get Started', "Add second service on Welcome screen ");
-                //     FB.AppEvents.logEvent('Add second service on Welcome screen');
-                // } catch (error) {
-                //     console.log(error)
-                // }
-
-				// clearTimeout(plusTimeout)
-
-				const tab = Ext.cq1('app-main').getComponent('plusTab') 
-				tab.setIcon('resources/tools/add.png')
-				localStorage.setItem('appealingPlus', false)
-			}
-
-			// Tracks First Plus Click
-			// if (Ext.getStore('Services').data.length === 0) {
-			// 	ga_storage._trackEvent('Application', 'Get Started', "Add service on Welcome screen ");
-			// 	FB.AppEvents.logEvent('Add service on Welcome screen');
-			// }
-			
 			if ( Rambox.app.getTotalNotifications() > 0 ) {
 				document.title = 'Rambox ('+ Rambox.app.getTotalNotifications() +')';
 			} else {
@@ -117,7 +55,6 @@ Ext.define('Rambox.view.main.MainController', {
 			tab.id === 'ramboxTab' || 
 			tab.id === 'tbfill' || 
 			tab.id === 'settingsTab' || 
-			tab.id === 'upgradeTab' || 
 			tab.id === 'notificationsTab' ||
 			tab.id === 'welcomeTab'
 		) return true;
@@ -131,7 +68,6 @@ Ext.define('Rambox.view.main.MainController', {
 				t.id !== 'ramboxTab' && 
 				t.id !== 'tbfill' && 
 				t.id !== 'settingsTab' && 
-				t.id !== 'upgradeTab' && 
 				t.id !== 'notificationsTab' && 
 				t.id !== 'welcomeTab' &&
 				t.record.get('enabled') 
@@ -193,9 +129,6 @@ Ext.define('Rambox.view.main.MainController', {
 
 		
 		
-		const maxServices = 2 // Maximum ammount of non premium services
-		const serviceCnt = Ext.getStore('Services').data.length // Current service number
-
 		const rec_id = item.getAttribute('id').split('_')[1]
 
 		let rc = {}
@@ -205,33 +138,6 @@ Ext.define('Rambox.view.main.MainController', {
 				return false
 			}
 		})
-
-		/**
-		 * Check if exceded messanger limits
-		 */
-		// if (serviceCnt >= maxServices && !(localStorage.getItem('activated') == 'true')) {
-		if (serviceCnt >= maxServices && !(localStorage.getItem('activated') == 'true')) {
-            // try {
-            //     ga_storage._trackEvent('Application', 'Upgrade to PRO Shown')
-            //     FB.AppEvents.logEvent('Upgrade to PRO Shown');
-            // } catch (error) {
-            //     console.log(error)
-            // }
-
-			// RESET
-			if (!localStorage.getItem('ntfPremium')) {
-				ipc.send('resetNotificationTimer')
-				localStorage.setItem('ntfPremium', true)
-			} 
-
-			Ext.create('Rambox.view.popup.Popup', {
-				record: rc
-			})
-
-			// clearTimeout(stgsTimeout)
-			localStorage.setItem('stgsTimeout', false)
-			return;
-		}
 
 		Ext.create('Rambox.view.add.Add', {
 			record: rc
@@ -618,11 +524,6 @@ Ext.define('Rambox.view.main.MainController', {
             if (!thisTab || typeof thisTab.id === 'undefined') return false;
 
             switch (thisTab.id) {
-                // case 'upgradeTab':
-                //     Ext.create('Rambox.view.popup.Popup')
-                //     return false
-                //     break;
-
                 case 'notificationsTab':
                     var dontDisturb = (localStorage.getItem('dontDisturb') == 'true');
                     this.dontDisturb(!dontDisturb)
@@ -650,31 +551,12 @@ Ext.define('Rambox.view.main.MainController', {
                     return false
                     break;
 
-				case 'settingsTab':
-					// console.log(localStorage.getItem('appealingSettings'))
-					this.clearSettingsState()
-					
-                    break;
             }
 
-            // if (thisTab.id === "notificationsTab" || thisTab.id === "upgradeTab") return false;
             if (thisTab.id === "notificationsTab") return false;
         } catch (err) {
             console.log(thisTab)
             console.log(err)
         }
-	}
-
-	,clearSettingsState: function () {
-		// clearTimeout(stgsTimeout)
-		localStorage.setItem('stgsTimeout', false)
-
-		// RESET
-		if (localStorage.getItem('appealingSettings') == 'true') ipc.send('resetNotificationTimer')
-		
-		localStorage.setItem('appealingSettings', false)
-
-		const tab = Ext.cq1('app-main').getComponent('setTab')
-		tab.setIcon('resources/tools/settings.png')
 	}
 });

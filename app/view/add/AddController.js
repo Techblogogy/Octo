@@ -157,7 +157,6 @@ Ext.define('Rambox.view.add.AddController', {
 		// Checks if hint message is displayed
 		const nHint = win.down('container[name="nHint"]').hidden
 
-		// Rambox.util.License.check()
 
 		// Checks if messenger of same type already exists
 		let trigger = false

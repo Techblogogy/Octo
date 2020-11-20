@@ -2,18 +2,6 @@
  * Default config for all webviews created
  */
 
-String.prototype.toHHMMSS = function () {
-    var sec_num = parseInt(this, 10); // don't forget the second param
-    var hours   = Math.floor(sec_num / 3600);
-    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-    var seconds = sec_num - (hours * 3600) - (minutes * 60);
-
-    if (hours   < 10) {hours   = "0"+hours;}
-    if (minutes < 10) {minutes = "0"+minutes;}
-    if (seconds < 10) {seconds = "0"+seconds;}
-    return hours+':'+minutes+':'+seconds;
-}
-
 Ext.define('Rambox.ux.WebView',{
 	 extend: 'Ext.panel.Panel'
 	,xtype: 'webview'
@@ -519,40 +507,6 @@ Ext.define('Rambox.ux.WebView',{
 
 				console.log('doManualNotification', count)
 				Rambox.util.Notifier.dispatchNotification(me, count);
-		} else if (
-			me.currentUnreadCount < count &&
-			me.record.get('notifications') &&
-			!JSON.parse(localStorage.getItem('dontDisturb'))
-		) {
-			console.log('tickNotification', count)
-			
-			var totalCount = parseInt( localStorage.getItem('lifetimeNotificationCount') )
-
-			console.log('tick Notification', totalCount)
-
-			totalCount += count
-			localStorage.setItem('lifetimeNotificationCount', totalCount)
-
-			if (totalCount >= 50 && !localStorage.getItem('timeTracked')) {
-
-				let delta = ( Date.now() - parseInt(localStorage.getItem('startTime')) ) / 1000
-
-				console.log("Time Passed " + delta.toString().toHHMMSS())
-				// ga_storage._trackEvent('Application', 'Time', delta.toString().toHHMMSS())
-
-				localStorage.setItem('timeTracked', true)
-			}
-
-			// if (totalCount >= 50 && Ext.getStore('Services').data.length == 2) {
-
-			// 	console.log('Placeholder for 3rd messenger intersection')
-
-			// 	// var notification = new Notification("Octo", {
-			// 	// 	body: "Add third messenger",
-			// 	// });
-			// }
-
-
 		}
 
 		me.currentUnreadCount = count;

@@ -6,7 +6,6 @@ Ext.define('Rambox.view.main.Main', {
 		,'Rambox.ux.WebView'
 		,'Rambox.ux.mixin.Badge'
 		,'Rambox.view.add.Add'
-		,'Rambox.view.popup.Popup'
 		,'Ext.ux.TabReorderer',
 
 	]
@@ -37,7 +36,7 @@ Ext.define('Rambox.view.main.Main', {
 
 	,items: [
 		{
-			 icon: (localStorage.getItem('appealingPlus') == 'true') ? 'resources/tools/add_2.png' : 'resources/tools/add.png'
+			 icon: 'resources/tools/add.png'
 			,title: 'Add Service'
 			,id: 'ramboxTab'
 			,itemId: 'plusTab'

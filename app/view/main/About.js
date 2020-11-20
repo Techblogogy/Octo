@@ -22,7 +22,6 @@ Ext.define('Rambox.view.main.About', {
 		 '<div style="text-align:center;"><img src="resources/Icon.png" width="100" /></div>'
 		,'<h4 style="text-align:center;">Octo {version}</h4>'
 		,'<h3 class="about-desc">Keep all messaging services in one window and create your own set of messengers with Octo.</h3>'
-		,'<div> <a href="mailto:octo.support@bestmacsoft.com" target="_blank">octo.support@bestmacsoft.com</a> </div>'
 	],
 
 	dockedItems:{
@@ -60,7 +59,7 @@ Ext.define('Rambox.view.main.About', {
 
 					{
 						xtype: "component",
-						html: '<a href="https://github.com/ZoomSupport/octo" target="_blank"><img src="resources/tools/github_logo.png" width="80" height="23" /></a>',
+						html: '<a href="https://github.com/Techblogogy/Octo" target="_blank"><img src="resources/tools/github_logo.png" width="80" height="23" /></a>',
 					}
 				]
 

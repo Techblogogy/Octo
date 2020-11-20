@@ -129,7 +129,6 @@ ipc.on('reloadCurrentService', function(e) {
 	if ( 
 		tab.id !== 'ramboxTab' && 
 		tab.id !== 'settingsTab' && 
-		tab.id !== 'upgradeTab' && 
 		tab.id !== 'notificationsTab' &&
 		tab.id !== 'welomeTab'
 	) tab.reloadService();

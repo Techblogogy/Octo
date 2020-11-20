@@ -8,7 +8,6 @@ Ext.define('Rambox.Application', {
 		,'Rambox.util.MD5'
 		,'Ext.window.Toast'
 		,'Ext.util.Cookies'
-		,'Rambox.util.License'
 	]
 
 	,stores: [
@@ -215,8 +214,6 @@ Ext.define('Rambox.Application', {
 		if ( localStorage.getItem('dontDisturb') === null ) localStorage.setItem('dontDisturb', false);
 		ipc.send('setDontDisturb', localStorage.getItem('dontDisturb')); // We store it in config
 
-		if ( localStorage.getItem('lifetimeNotificationCount') === null ) localStorage.setItem('lifetimeNotificationCount', '0');
-
 		if ( localStorage.getItem('locked') ) {
 			console.info('Lock Rambox:', 'Enabled');
 			Ext.cq1('app-main').getController().showLockWindow();
@@ -292,55 +289,8 @@ Ext.define('Rambox.Application', {
 			});
 		}
 
-		ipc.on('getServiceNum', function (e) {
-		// ipc.on('sendIntervalNotification', function (e) {
-			const len = Ext.getStore('Services').data.length;
-			// e.sender.send('serviceNum', len);
-			// console.log(len)
-			ipc.send('serviceNum', 
-				len, 
-
-				(localStorage.getItem('appealingSettings') == 'true'),
-				(localStorage.getItem('appealingPlus') == 'true'),
-
-				(localStorage.getItem('activated') == 'true'),
-				(localStorage.getItem('premiumToggle') == 'true'),
-
-				parseInt( localStorage.getItem('lifetimeNotificationCount') ),
-				(localStorage.getItem('plusClicked') == 'true')
-			);
-
-		});
-
-		// Handle timer trigger
-		ipc.on('timerTriggered', function(e) {
-			console.log('TIMER TRIGGERED')
-
-			if (localStorage.getItem('plusTimeout') == 'true') {
-				ipc.send('resetNotificationTimer')
-
-				const tab = Ext.cq1('app-main').getComponent('plusTab') 
-				tab.setIcon('resources/tools/add_2.png')
-
-				localStorage.setItem('appealingPlus', true)
-			}
-
-			if (localStorage.getItem('stgsTimeout') == 'true') {
-				ipc.send('resetNotificationTimer')
-
-				localStorage.setItem('appealingSettings', true)
-				
-				const tab = Ext.cq1('app-main').getComponent('setTab')
-				tab.setIcon('resources/tools/settings_2.png')
-			}
-		})
-
 		// Remove spinner
 		Ext.get('spinner').destroy();
-
-		// Send request to license server
-		Rambox.util.License.checkLicense()
-		// localStorage.setItem('activated', false)
 
 	}
 

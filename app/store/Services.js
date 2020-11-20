@@ -1,21 +1,4 @@
 
-const upgrade = {
-	icon: 'resources/tools/upgrade.png',
-
-	title: 'Upgrade',
-
-	id: 'upgradeTab',
-	closable: false,
-	reorderable: false,
-
-	tabConfig: {
-		cls: 'upgrade-icon',
-		handler: 'notButton',
-
-		margin: 0
-	},
-}
-
 const notifications = {
 	icon: 'resources/tools/notifications.png',
 
@@ -33,7 +16,7 @@ const notifications = {
 }
 
 const settings = {
-	icon: (localStorage.getItem('appealingSettings') == 'true') ? 'resources/tools/settings_2.png' : 'resources/tools/settings.png'
+	icon: 'resources/tools/settings.png'
 	
 	,id: 'settingsTab'
 
@@ -193,11 +176,6 @@ const settings = {
 }
 
 
-var plusTimeout = null;
-var stgsTimeout = null;
-// var stgTime = 1000*60*3;
-var stgTime = 1000*5;
-
 Ext.define('Rambox.store.Services', {
 	 extend: 'Ext.data.Store'
 	,alias: 'store.services'
@@ -278,14 +256,6 @@ Ext.define('Rambox.store.Services', {
 
 				Ext.cq1('app-main').add(notifications)
 				Ext.cq1('app-main').add(settings)
-
-				
-
-				if (
-					!(localStorage.getItem('activated') == 'true') && 
-					localStorage.getItem('premiumToggle')
-				) Ext.cq1('app-main').add(upgrade)
-
 			}
 
 			const welcomeTab = Ext.cq1('app-main').getComponent('welcomeTab');
@@ -299,85 +269,13 @@ Ext.define('Rambox.store.Services', {
 		},
 
 		add: function (store, records, i) {
-
-			console.log("Adding service")
-			const sLen = store.data.length
-			const sName = store.data.items[sLen-1].data.type
-
-			// try {
-            //     // Google Analytics Tracking
-            //     ga_storage._trackEvent('Application', 'Add Service #'+sLen, sName)
-            //     FB.AppEvents.logEvent('Add Service '+sLen)
-			// } catch (error) {
-            //     console.log(error)
-			// }
-
 			if (store.data.length > 1) {
-				// if (Ext.cq1('app-main').getComponent('upgradeTab') === undefined)
-				// 	Ext.cq1('app-main').add(upgrade)
-
-					
 				if (typeof Ext.cq1('app-main').getComponent('notificationsTab') == 'undefined')
 					Ext.cq1('app-main').add(notifications)
 
-				if (typeof Ext.cq1('app-main').getComponent('setTab') == 'undefined') {
-
+				if (typeof Ext.cq1('app-main').getComponent('setTab') == 'undefined')
 					Ext.cq1('app-main').add(settings)
-
-					if (!localStorage.getItem('stgsTimeout')) {
-						localStorage.setItem('stgsTimeout', true)
-						localStorage.setItem('plusTimeout', false)
-						ipc.send('timerReset')
-					}
-				}
-				
-				
-				// RESET
-				// ipc.send('resetNotificationTimer')
 			}
-
-			if (store.data.length == 1) {
-
-				// RESET
-				if (!localStorage.getItem('ntfFirst')) {
-
-					ipc.send('resetNotificationTimer')
-					localStorage.setItem('ntfFirst', true)
-				}
-
-				// ga_storage._trackEvent('Application', 'Get Started', 'Add service on Welcome screen')
-
-				// Update within tab
-				if (!localStorage.getItem('plusTimeout')) {
-					localStorage.setItem('plusTimeout', true)
-					ipc.send('timerReset')
-				}
-				// plusTimeout = setTimeout(function () {
-
-				// 	const tab = Ext.cq1('app-main').getComponent('plusTab') 
-				// 	tab.setIcon('resources/tools/add_2.png')
-
-				// 	localStorage.setItem('appealingPlus', true)
-
-				// }, stgTime)
-			} else if (store.data.length == 2) {
-
-				// RESET
-				if (!localStorage.getItem('ntfSecond')) {
-
-					ipc.send('resetNotificationTimer')
-					localStorage.setItem('ntfSecond', true)
-
-					localStorage.setItem('startTime', Date.now().toString())
-				}
-
-				// localStorage.setItem('appealingPlus', false)
-				// ga_storage._trackEvent('Application', 'Get Started', 'Add second service on Welcome screen')
-
-				// const tab = Ext.cq1('app-main').getComponent('plusTab') 
-				// tab.setIcon('resources/tools/add.png')
-			}
-
 		},
 
 		update: function (store, op, modName, det) {
