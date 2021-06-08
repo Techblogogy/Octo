@@ -252,14 +252,6 @@ module.exports = function(config) {
 			type: 'separator'
 		});
 		helpSubmenu.push({
-			label: `&`+locale['menu.help[5]'],
-			click(item, win) {
-				const webContents = win.webContents;
-				const send = webContents.send.bind(win.webContents);
-				send('autoUpdater:check-update');
-			}
-		});
-		helpSubmenu.push({
 			label: `&`+locale['menu.help[6]'],
 			click() {
 				sendAction('showAbout')

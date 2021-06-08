@@ -21,58 +21,6 @@ ipc.on('showPreferences', function(event, message) {
 	Ext.cq1('app-main').setActiveTab(stgTab)
 
 });
-ipc.on('autoUpdater:check-update', function() {
-	Rambox.app.checkUpdate();
-});
-ipc.on('autoUpdater:update-not-available', function() {
-	Ext.Msg.show({
-		 title: 'You are up to date!'
-		,message: 'You have the latest version of Rambox.'
-		,icon: Ext.Msg.INFO
-		,buttons: Ext.Msg.OK
-	});
-});
-ipc.on('autoUpdater:update-available', function() {
-	Ext.Msg.show({
-		 title: 'New Version available!'
-		,message: 'Please wait until Rambox download the new version and ask you for install it.'
-		,icon: Ext.Msg.INFO
-		,buttons: Ext.Msg.OK
-	});
-});
-ipc.on('autoUpdater:update-downloaded', function(e, releaseNotes, releaseName, releaseDate, updateURL) {
-	Ext.cq1('app-main').addDocked({
-		 xtype: 'toolbar'
-		,dock: 'top'
-		,ui: 'newversion'
-		,items: [
-			'->'
-			,{
-				 xtype: 'label'
-				,html: '<b>New version ready to install ('+releaseName+')!</b> It will be installed the next time Rambox is relaunched.'
-			}
-			,{
-				 xtype: 'button'
-				,text: 'Relaunch Now'
-				,handler: function(btn) { ipc.send('autoUpdater:quit-and-install'); }
-			}
-			,{
-				 xtype: 'button'
-				,text: 'Changelog'
-				,ui: 'decline'
-				,href: 'https://github.com/saenzramiro/rambox/releases/tag/'+releaseName
-			}
-			,'->'
-			,{
-				 glyph: 'xf00d@FontAwesome'
-				,baseCls: ''
-				,style: 'cursor:pointer;'
-				,handler: function(btn) { Ext.cq1('app-main').removeDocked(btn.up('toolbar'), true); }
-			}
-		]
-	});
-});
-
 // Set Badge in taskbar for Windows
 ipc.on('setBadge', function(event, messageCount) {
 	messageCount = messageCount.toString();

@@ -55,9 +55,6 @@ Ext.define('Rambox.Application', {
 		// Ext.util.Cookies.set('version', require('electron').remote.app.getVersion());
 		// if ( Ext.util.Cookies.get('auth0') === null ) Ext.util.Cookies.set('auth0', false);
 
-		// Check for updates
-		if ( require('electron').remote.process.argv.indexOf('--without-update') === -1 && process.platform !== 'win32' ) Rambox.app.checkUpdate(true);
-
 		// Add shortcuts to switch services using CTRL + Number
 		var map = new Ext.util.KeyMap({
 			 target: document
@@ -311,74 +308,5 @@ Ext.define('Rambox.Application', {
 				document.title = 'Rambox';
 			}
 		}
-	}
-
-	,checkUpdate: function(silence) {
-		console.info('Checking for updates...');
-		if (!updateServer.url) return;
-
-		Ext.Ajax.request({
-			 url: updateServer.url
-			,method: 'GET'
-			,success: function(response) {
-				var json = Ext.decode(response.responseText);
-				var appVersion = new Ext.Version(require('electron').remote.app.getVersion());
-
-				// json.version = "2.0.5"
-
-				console.log(json, appVersion)
-
-				if ( appVersion.isLessThan(json.version) ) {
-					console.info('New version is available', json.version);
-					Ext.cq1('app-main').addDocked({
-						 xtype: 'toolbar'
-						,dock: 'top'
-						,ui: 'newversion'
-						,cls: 'new-version-popup'
-						,padding: "10 0"
-						,items: [
-							'->'
-							,{
-								 xtype: 'label'
-								,html: '<b>'+locale['app.update[0]']+'</b>'
-							}
-							,{
-								 xtype: 'button'
-								,text: locale['app.update[1]']
-								,cls: 'update-download-btn'
-								,href: process.platform === 'darwin' ? 'https://getrambox.herokuapp.com/download/'+process.platform+'_'+process.arch : 'https://github.com/saenzramiro/rambox/releases/latest'
-								,padding: "5"
-								,margin: "0 0 0 20"
-							}
-							// ,{
-							// 	 xtype: 'button'
-							// 	,text: locale['app.update[2]']
-							// 	,ui: 'decline'
-							// 	,tooltip: 'Click here to see more information about the new version.'
-							// 	,href: 'https://github.com/saenzramiro/rambox/releases/tag/'+json.version
-							// }
-							,'->'
-							,{
-								 glyph: 'xf00d@FontAwesome'
-								,baseCls: ''
-								,style: 'cursor:pointer;'
-								,handler: function(btn) { Ext.cq1('app-main').removeDocked(btn.up('toolbar'), true); }
-							}
-						]
-					});
-					if ( process.platform === 'win32' ) ipc.send('autoUpdater:check-for-updates');
-					return;
-				} else if ( !silence ) {
-					Ext.Msg.show({
-						 title: locale['app.update[3]']
-						,message: locale['app.update[4]']
-						,icon: Ext.Msg.INFO
-						,buttons: Ext.Msg.OK
-					});
-				}
-
-				console.info('Your version is the latest. No need to update.');
-			}
-		});
 	}
 });

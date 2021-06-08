@@ -9,8 +9,6 @@ var AutoLaunch = require('auto-launch-patched');
 const Config = require('electron-config');
 // Development
 const isDev = require('electron-is-dev');
-// Updater
-// const updater = require('./updater');
 // File System
 var fs = require("fs");
 const path = require('path');
@@ -188,8 +186,6 @@ function createWindow() {
 
 
 	tray.create(mainWindow, config);
-
-	if (fs.existsSync(path.resolve(path.dirname(process.execPath), '..', 'Update.exe')) && process.argv.indexOf('--without-update') === -1) updater.initialize(mainWindow);
 
 	// Open links in default browser
 	mainWindow.webContents.on('new-window', function (e, url, frameName, disposition, options) {

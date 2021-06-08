@@ -21,9 +21,8 @@ All-in-one messenger. Forked from [Rambox](https://github.com/saenzramiro/rambox
 
 1. `git clone https://github.com/Techblogogy/Octo.git`
 2. `npm install`
-3. Configure `env-sample.js` and rename it to `env.js`.
-4. `npm run sencha:compile`
-5. `npm start`
+3. `npm run sencha:compile`
+4. `npm start`
 
 #### Compile on Ubuntu:
 
@@ -33,9 +32,8 @@ These instructions were tested with Ubuntu 17.04.
 3. Install Sencha Cmd (non-free): https://www.sencha.com/products/extjs/cmd-download/
 4. Clone repository: `git clone https://github.com/Techblogogy/Octo.git`
 5. Install npm dependencies: `npm install`
-6. Configure `env-sample.js` and rename it to `env.js`.
-7. Compile: `npm run sencha:compile`
-8. Start program: `npm start`
+6. Compile: `npm run sencha:compile`
+7. Start program: `npm start`
 
 
 Licence

@@ -33,7 +33,6 @@ npm-debug.log
 
 # Vagrant
 /.vagrant
-env.js
 rambox_cfg.json
 languages.js
 
