@@ -1,0 +1,58 @@
+// Octo theme entry point. Compiled with dart-sass: `npm run build:css`.
+//
+// This replaces the Sencha Cmd / Compass theme build. The Ext JS base theme
+// (crisp) is linked as a prebuilt stylesheet from ext/, so this file only
+// carries Octo's own styles. Output: resources/octo.css, and every url()
+// below is relative to that file.
+
+$base-color: #2E658E;
+$highlight-color: #0F92FE;
+
+// Minimal stand-ins for the Ext theme mixins the source files use.
+@mixin extjs-toolbar-ui($ui, $background-color) {
+	.x-toolbar-#{$ui} {
+		background-color: $background-color;
+		border: 0;
+	}
+}
+
+@mixin extjs-button-small-ui($ui, $background-color, $background-color-over, $background-color-pressed, $color) {
+	.x-btn-#{$ui}-small {
+		background-color: $background-color;
+		border-color: transparent;
+	}
+	.x-btn-#{$ui}-small.x-btn-over { background-color: $background-color-over; }
+	.x-btn-#{$ui}-small.x-btn-pressed { background-color: $background-color-pressed; }
+	.x-btn-inner-#{$ui}-small,
+	.x-btn-icon-el-#{$ui}-small { color: $color; }
+}
+
+@import '../packages/local/rambox-default-theme/sass/etc/all';
+
+@import '../packages/local/rambox-default-theme/sass/src/LoadMask';
+@import '../packages/local/rambox-default-theme/sass/src/button/Button';
+@import '../packages/local/rambox-default-theme/sass/src/grid/column/Action';
+@import '../packages/local/rambox-default-theme/sass/src/grid/column/Check';
+@import '../packages/local/rambox-default-theme/sass/src/panel/Body';
+@import '../packages/local/rambox-default-theme/sass/src/panel/Header';
+@import '../packages/local/rambox-default-theme/sass/src/panel/Tool';
+@import '../packages/local/rambox-default-theme/sass/src/tab/Bar';
+@import '../packages/local/rambox-default-theme/sass/src/toolbar/Toolbar';
+
+// Values that used to be fed into the crisp theme through sass/var/*.
+.x-tab-icon-el-default {
+	width: 24px;
+	height: 24px;
+}
+.x-tab-bar-strip-default { height: 0; }
+.x-tab-bar-default { padding: 0; }
+#settingsTab .x-grid-cell-inner { padding: 20px 30px; }
+.x-panel-header-title-default {
+	font-family: "Helvetica Neue", "Segoe UI";
+	font-weight: 400;
+}
+
+// The load mask spinner ships with the crisp theme.
+.bottomMask .x-mask-msg-text {
+	background-image: url(../ext/packages/ext-theme-crisp/build/resources/images/loadmask/loading.gif);
+}

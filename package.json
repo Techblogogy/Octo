@@ -4,6 +4,8 @@
     "start": "electron --inspect electron/main.js",
     "rebuild": "electron-rebuild -f -w electron-vibrancy",
     "start:debug": "electron electron/main.js --enable-logging",
+    "build:css": "sass --no-source-map sass/octo.scss resources/octo.css",
+    "watch:css": "sass --watch sass/octo.scss resources/octo.css",
     "test": "./node_modules/.bin/mocha test/tests/**/*.spec.js",
     "sencha:clean": "rm -rf ./build/production",
     "sencha:compile": "sencha app build && cp app/package.json build/production/Rambox/ && npm --prefix ./build/production/Rambox/ install ./build/production/Rambox/",
@@ -103,7 +105,8 @@
     "electron-rebuild": "^1.8.6",
     "electron-squirrel-startup": "^1.0.0",
     "mocha": "3.2.0",
-    "spectron": "3.4.0"
+    "spectron": "3.4.0",
+    "sass": "^1.49.0"
   },
   "dependencies": {
     "auto-launch-patched": "5.0.2",
