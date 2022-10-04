@@ -471,45 +471,6 @@ Ext.define('Rambox.view.main.MainController', {
 		Ext.create('Rambox.view.preferences.Preferences').show();
 	}
 
-	,login: function(btn) {
-		var me = this;
-
-		Rambox.ux.Auth0.login();
-	}
-
-	,logout: function(btn) {
-		var me = this;
-
-		var logoutFn = function(callback) {
-			Ext.Msg.wait(locale['app.window[37]'], locale['app.main[21]']);
-
-			// Google Analytics Event
-			// ga_storage._trackEvent('Users', 'loggedOut');
-
-			// Logout from Auth0
-			Rambox.ux.Auth0.logout();
-
-			Ext.cq1('app-main').getViewModel().set('username', '');
-			Ext.cq1('app-main').getViewModel().set('avatar', '');
-
-			if ( Ext.isFunction(callback) ) callback();
-
-			Ext.Msg.hide();
-		}
-
-		if ( btn ) {
-			Ext.Msg.confirm(locale['app.main[21]'], locale['app.window[38]'], function(btnId) {
-				if ( btnId === 'yes' ) {
-					logoutFn(function() {
-						me.removeAllServices();
-					});
-				}
-			});
-		} else {
-			logoutFn();
-		}
-	}
-
 	,notButton: function (btn) {
 
 		console.log('Settings Click')

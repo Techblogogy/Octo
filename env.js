@@ -1,7 +1,2 @@
-// Runtime configuration. The app boots with these defaults; nothing here is secret.
-
-// Auth0 account sync inherited from Rambox. Left empty: the sync backend is not used.
-var auth0Cfg = {
-	 clientID: ''
-	,domain: ''
-};
+// Runtime configuration. Nothing here is secret; the app boots with these defaults.
+var env = {};

@@ -1,26 +1,44 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-	<title>Rambox</title>
+	<title>Octo</title>
 
-	<!-- The line below must be kept intact for Sencha Cmd to build your application -->
-	<script id="microloader" type="text/javascript" src="bootstrap.js"></script>
+	<!-- Ext JS 5.1 base theme (prebuilt) and Octo styles (npm run build:css) -->
+	<link rel="stylesheet" href="ext/packages/ext-theme-crisp/build/resources/ext-theme-crisp-all.css">
+	<link rel="stylesheet" href="resources/octo.css">
 
-	<!--- Localization -->
-	<script type='text/javascript'>
-	    (function(d, s){
+	<!-- Ext JS framework -->
+	<script src="ext/build/ext-all.js"></script>
+	<script src="overrides/Ext.js"></script>
+	<script src="packages/local/rambox-default-theme/overrides/init.js"></script>
+	<script>
+		// The app runs straight from source: classes under app/ and ext/src/ux
+		// are loaded on demand by Ext.Loader, no Sencha Cmd build step.
+		Ext.Loader.setConfig({
+			 enabled: true
+			,disableCaching: false
+			,paths: {
+				 'Rambox': 'app'
+				,'Ext.ux': 'ext/src/ux'
+			}
+		});
+	</script>
+
+	<!-- Localization -->
+	<script>
+		(function(d, s){
 			var t = d.createElement(s), e = d.getElementsByTagName(s)[0];
 			t.type = "text/javascript"; e.parentNode.insertBefore(t, e);
 			t.src = "resources/languages/"+require('electron').ipcRenderer.sendSync('getConfig').locale+".js";
 		})(document, "script");
 	</script>
 
-	<!--- Localization -->
-
+	<script src="resources/js/loadscreen.js"></script>
+	<script src="env.js"></script>
+	<script src="app.js"></script>
 </head>
 <body>
 	<div id="spinner" class="component" data-path-start="M280,466c0,0.13-0.001,0.26-0.003,0.39c-0.002,0.134-0.004,0.266-0.007,0.396
