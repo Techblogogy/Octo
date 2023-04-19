@@ -1,26 +1,16 @@
 'use strict';
 
-const { app, protocol, BrowserWindow, dialog, shell, Menu, ipcMain, nativeImage, session, Notification } = require('electron');
-// Tray
-const tray = require('./tray');
-// AutoLaunch
-var AutoLaunch = require('auto-launch-patched');
-// Configuration
-const Config = require('electron-config');
-// Development
-const isDev = require('electron-is-dev');
-// File System
-var fs = require("fs");
+const { app, BrowserWindow, shell, Menu, ipcMain, nativeImage, session } = require('electron');
 const path = require('path');
-// OS
-const os = require('os')
+const fs = require('fs');
+const Store = require('electron-store');
+const AutoLaunch = require('auto-launch');
+const tray = require('./tray');
 
-// const electronVibrancy = require('electron-vibrancy')
+const isDev = !app.isPackaged;
 
-
-
-// Initial Config
-const config = new Config({
+// Persistent configuration
+const config = new Store({
 	defaults: {
 		always_on_top: false
 		, hide_menu_bar: false
@@ -41,40 +31,54 @@ const config = new Config({
 
 		, x: undefined
 		, y: undefined
-		, width: 1074 //1000
-		, height: 660 //800
+		, width: 1074
+		, height: 660
 		, maximized: false
 	}
 });
 
 // Fix issues with HiDPI scaling on Windows platform
 if (config.get('enable_hidpi_support') && (process.platform === 'win32')) {
-	app.commandLine.appendSwitch('high-dpi-support', 'true')
-	app.commandLine.appendSwitch('force-device-scale-factor', '1')
+	app.commandLine.appendSwitch('high-dpi-support', 'true');
+	app.commandLine.appendSwitch('force-device-scale-factor', '1');
 }
 
-// Because we build it using Squirrel, it will assign UserModelId automatically, so we match it here to display notifications correctly.
-// https://github.com/electron-userland/electron-builder/issues/362
-app.setAppUserModelId('com.squirrel.Rambox.Rambox');
+// Squirrel assigns the UserModelId automatically, match it so notifications work on Windows
+app.setAppUserModelId('com.squirrel.Octo.Octo');
 
-// Menu
-const appMenu = require('./menu')(config);
+// Only one instance at a time; a second launch focuses the existing window
+if (!app.requestSingleInstanceLock()) {
+	app.quit();
+	return;
+}
+app.on('second-instance', function () {
+	if (!mainWindow) return;
+	if (mainWindow.isMinimized()) mainWindow.restore();
+	mainWindow.show();
+	mainWindow.focus();
+	mainWindow.setSkipTaskbar(false);
+	if (app.dock && app.dock.show) app.dock.show();
+});
 
-// Configure AutoLaunch
+// Auto launch
 const appLauncher = new AutoLaunch({
-	name: 'Rambox'
+	name: 'Octo'
 	, isHidden: config.get('start_minimized')
 });
-config.get('auto_launch') && !isDev ? appLauncher.enable() : appLauncher.disable();
+if (config.get('auto_launch') && !isDev) {
+	appLauncher.enable().catch(function () {});
+} else {
+	appLauncher.disable().catch(function () {});
+}
 
-// this should be placed at top of main.js to handle setup events quickly
+// Squirrel (Windows installer) lifecycle events
 if (handleSquirrelEvent()) {
 	// squirrel event handled and app will exit in 1000ms, so don't do anything else
 	return;
 }
 
 function handleSquirrelEvent() {
-	if (process.argv.length === 1) {
+	if (process.platform !== 'win32' || process.argv.length === 1) {
 		return false;
 	}
 
@@ -85,69 +89,44 @@ function handleSquirrelEvent() {
 	const updateDotExe = path.resolve(path.join(rootAtomFolder, 'Update.exe'));
 	const exeName = path.basename(process.execPath);
 
-	const spawn = function (command, args) {
-		let spawnedProcess, error;
-
-		try {
-			spawnedProcess = ChildProcess.spawn(command, args, { detached: true });
-		} catch (error) { }
-
-		return spawnedProcess;
-	};
-
 	const spawnUpdate = function (args) {
-		return spawn(updateDotExe, args);
+		try {
+			return ChildProcess.spawn(updateDotExe, args, { detached: true });
+		} catch (error) { }
 	};
 
-	const squirrelEvent = process.argv[1];
-	switch (squirrelEvent) {
+	switch (process.argv[1]) {
 		case '--squirrel-install':
 		case '--squirrel-updated':
-			// Optionally do things such as:
-			// - Add your .exe to the PATH
-			// - Write to the registry for things like file associations and
-			//   explorer context menus
-
-			// Install desktop and start menu shortcuts
 			spawnUpdate(['--createShortcut', exeName]);
-
 			setTimeout(app.quit, 1000);
 			return true;
 
 		case '--squirrel-uninstall':
-			// Undo anything you did in the --squirrel-install and
-			// --squirrel-updated handlers
-
-			// Remove desktop and start menu shortcuts
 			spawnUpdate(['--removeShortcut', exeName]);
-			// Remove user app data
-			require('rimraf').sync(require('electron').app.getPath('userData'));
-
+			fs.rmSync(app.getPath('userData'), { recursive: true, force: true });
 			setTimeout(app.quit, 1000);
 			return true;
 
 		case '--squirrel-obsolete':
-			// This is called on the outgoing version of your app before
-			// we update to the new version - it's the opposite of
-			// --squirrel-updated
-
 			app.quit();
 			return true;
 	}
-};
+	return false;
+}
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
-let mainWindow;
+// Keep a global reference of the window objects so they are not garbage collected
+let mainWindow = null;
+let mainMasterPasswordWindow = null;
 let isQuitting = false;
 
+// Hosts the user marked as trusted (self-signed certificates on custom services)
+const trustedHosts = new Set();
 
 function createWindow() {
-	// Create the browser window using the state information
 	mainWindow = new BrowserWindow({
 		title: 'Octo'
-		, icon: __dirname + '/../resources/Icon.ico'
-		// , backgroundColor: '#FFF'
+		, icon: path.join(__dirname, '..', 'resources', 'Icon.png')
 		, x: config.get('x')
 		, y: config.get('y')
 		, width: config.get('width')
@@ -155,175 +134,198 @@ function createWindow() {
 		, alwaysOnTop: config.get('always_on_top')
 		, autoHideMenuBar: config.get('hide_menu_bar')
 		, skipTaskbar: config.get('window_display_behavior') === 'show_trayIcon'
-		, show: true // !config.get('start_minimized')
+		, show: true
 		, acceptFirstMouse: true
 		, webPreferences: {
-			webSecurity: false
-			, nodeIntegration: true
-			, plugins: true
+			// The Ext JS renderer talks to Node and hosts <webview> tags directly
+			nodeIntegration: true
+			, contextIsolation: false
+			, sandbox: false
+			, webviewTag: true
+			, webSecurity: false
 			, partition: 'persist:rambox'
 			, experimentalFeatures: true
 		}
 		, titleBarStyle: 'hidden'
 		, frame: false
 		, transparent: true
-		, vibrancy: 'dark'
-		, resizable: true,
+		, vibrancy: 'under-window'
+		, resizable: true
 	});
 
 	if (!config.get('start_minimized') && config.get('maximized')) mainWindow.maximize();
 
 	process.setMaxListeners(10000);
 
-	// Open the DevTools.
-	if (isDev) mainWindow.webContents.openDevTools();
+	if (isDev) mainWindow.webContents.openDevTools({ mode: 'detach' });
 
-	// and load the index.html of the app.
-	mainWindow.loadURL('file://' + __dirname + '/../index.html');
+	mainWindow.loadFile(path.join(__dirname, '..', 'index.html'));
 
-	mainWindow.setMenu(null);
-	// Menu.setApplicationMenu(appMenu);
-
+	// The frameless window has no menu bar; on macOS the application menu still
+	// provides the Edit shortcuts (copy / paste) and the About entry.
+	if (process.platform === 'darwin') {
+		Menu.setApplicationMenu(require('./menu')(config));
+	} else {
+		mainWindow.setMenu(null);
+	}
 
 	tray.create(mainWindow, config);
 
-	// Open links in default browser
-	mainWindow.webContents.on('new-window', function (e, url, frameName, disposition, options) {
-		console.log("NEW WINDOW")
-		const protocol = require('url').parse(url).protocol;
-		switch (disposition) {
-			case 'new-window':
-				e.preventDefault();
-				const win = new BrowserWindow(options);
-				win.once('ready-to-show', () => {
-
-					// electronVibrancy.SetVibrancy(true, mainWindow.getNativeWindowHandle())
-					// electronVibrancy.SetVibrancy(mainWindow, 3);
-
-					win.show()
-				});
-				win.loadURL(url);
-				e.newGuest = win;
-				break;
-			case 'foreground-tab':
-				if (protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:') {
-					e.preventDefault();
-					shell.openExternal(url);
-				}
-				break;
-			default:
-				break;
+	// Links opened from the main window go to the default browser
+	mainWindow.webContents.setWindowOpenHandler(function ({ url }) {
+		const protocol = new URL(url).protocol;
+		if (protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:') {
+			shell.openExternal(url);
 		}
+		return { action: 'deny' };
 	});
 
-	mainWindow.webContents.on('will-navigate', function (event, url) {
+	mainWindow.webContents.on('will-navigate', function (event) {
 		event.preventDefault();
+	});
+
+	// <webview> guests: hand window.open / target=_blank back to the renderer,
+	// which decides per service what to do with it
+	mainWindow.webContents.on('did-attach-webview', function (event, webContents) {
+		webContents.setWindowOpenHandler(function ({ url, disposition }) {
+			mainWindow.webContents.send('webview:new-window', webContents.id, url, disposition);
+			return { action: 'deny' };
+		});
 	});
 
 	// BrowserWindow events
 	mainWindow.on('page-title-updated', (e, title) => updateBadge(title));
-	mainWindow.on('maximize', function (e) { config.set('maximized', true); });
-	mainWindow.on('unmaximize', function (e) { config.set('maximized', false); });
-	mainWindow.on('resize', function (e) { if (!mainWindow.isMaximized()) config.set(mainWindow.getBounds()); });
-	mainWindow.on('move', function (e) { if (!mainWindow.isMaximized()) config.set(mainWindow.getBounds()); });
+	mainWindow.on('maximize', function () { config.set('maximized', true); });
+	mainWindow.on('unmaximize', function () { config.set('maximized', false); });
+	mainWindow.on('resize', function () { if (!mainWindow.isMaximized()) config.set(mainWindow.getBounds()); });
+	mainWindow.on('move', function () { if (!mainWindow.isMaximized()) config.set(mainWindow.getBounds()); });
 	mainWindow.on('app-command', (e, cmd) => {
-		// Navigate the window back when the user hits their mouse back button
+		// Mouse back / forward buttons navigate the active service
 		if (cmd === 'browser-backward') mainWindow.webContents.executeJavaScript('if(Ext.cq1("app-main")) Ext.cq1("app-main").getActiveTab().goBack();');
-		// Navigate the window forward when the user hits their mouse forward button
 		if (cmd === 'browser-forward') mainWindow.webContents.executeJavaScript('if(Ext.cq1("app-main")) Ext.cq1("app-main").getActiveTab().goForward();');
 	});
 
-
-	// Emitted when the window is closed.
 	mainWindow.on('close', function (e) {
-		if (!isQuitting) {
-			e.preventDefault();
+		if (isQuitting) return;
+		e.preventDefault();
 
-			switch (process.platform) {
-				case 'darwin':
-					app.hide();
-					break;
-				case 'linux':
-				case 'win32':
-				default:
-					switch (config.get('window_close_behavior')) {
-						case 'keep_in_tray':
-							mainWindow.hide();
-							break;
-						case 'keep_in_tray_and_taskbar':
-							mainWindow.minimize();
-							break;
-						case 'quit':
-							app.quit();
-							break;
-					}
-					break;
-			}
+		switch (process.platform) {
+			case 'darwin':
+				app.hide();
+				break;
+			default:
+				switch (config.get('window_close_behavior')) {
+					case 'keep_in_tray':
+						mainWindow.hide();
+						break;
+					case 'keep_in_tray_and_taskbar':
+						mainWindow.minimize();
+						break;
+					case 'quit':
+						app.quit();
+						break;
+				}
+				break;
 		}
 	});
-	mainWindow.on('closed', function (e) {
+	mainWindow.on('closed', function () {
 		mainWindow = null;
 	});
 	mainWindow.once('focus', () => mainWindow.flashFrame(false));
-
 }
 
-let mainMasterPasswordWindow;
 function createMasterPasswordWindow() {
 	mainMasterPasswordWindow = new BrowserWindow({
 		backgroundColor: '#0675A0'
 		, frame: false
+		, webPreferences: {
+			nodeIntegration: true
+			, contextIsolation: false
+			, sandbox: false
+		}
 	});
-	// Open the DevTools.
-	if (isDev) mainMasterPasswordWindow.webContents.openDevTools();
+	if (isDev) mainMasterPasswordWindow.webContents.openDevTools({ mode: 'detach' });
 
-	mainMasterPasswordWindow.loadURL('file://' + __dirname + '/../masterpassword.html');
-	mainMasterPasswordWindow.on('close', function () { mainMasterPasswordWindow = null });
+	mainMasterPasswordWindow.loadFile(path.join(__dirname, '..', 'masterpassword.html'));
+	mainMasterPasswordWindow.on('close', function () { mainMasterPasswordWindow = null; });
 }
 
 function updateBadge(title) {
-	var messageCount = title.match(/\d+/g) ? parseInt(title.match(/\d+/g).join("")) : 0;
+	const messageCount = title.match(/\d+/g) ? parseInt(title.match(/\d+/g).join(''), 10) : 0;
 
 	tray.setBadge(messageCount, config.get('systemtray_indicator'));
 
-	if (process.platform === 'win32') { // Windows
+	if (process.platform === 'win32') {
 		if (messageCount === 0) {
-			mainWindow.setOverlayIcon(null, "");
+			mainWindow.setOverlayIcon(null, '');
 			return;
 		}
-
 		mainWindow.webContents.send('setBadge', messageCount);
-	} else { // macOS & Linux
+	} else {
 		app.setBadgeCount(messageCount);
 	}
 
 	if (messageCount > 0 && !mainWindow.isFocused() && !config.get('dont_disturb') && config.get('flash_frame')) mainWindow.flashFrame(true);
 }
 
-ipcMain.on('openExternalLink', function (e, url) {
+// Certificate errors: only accepted for hosts the user marked as trusted
+app.on('certificate-error', function (event, webContents, url, error, certificate, callback) {
+	let host = '';
+	try { host = new URL(url).hostname; } catch (e) { }
+	if (trustedHosts.has(host)) {
+		event.preventDefault();
+		callback(true);
+	} else {
+		callback(false);
+	}
+});
+
+// ---- IPC ----
+
+ipcMain.on('getVersion', function (event) {
+	event.returnValue = app.getVersion();
+});
+
+ipcMain.on('getDirName', function (event) {
+	event.returnValue = __dirname;
+});
+
+ipcMain.on('quitApp', function () {
+	isQuitting = true;
+	app.quit();
+});
+
+ipcMain.on('showWindow', function () {
+	if (!mainWindow) return;
+	if (mainWindow.isMinimized()) mainWindow.restore();
+	mainWindow.show();
+	mainWindow.focus();
+});
+
+ipcMain.on('openExternalLink', function (event, url) {
 	shell.openExternal(url);
-})
+});
+
+ipcMain.on('trustCertificate', function (event, url) {
+	try { trustedHosts.add(new URL(url).hostname); } catch (e) { }
+});
 
 ipcMain.on('setBadge', function (event, messageCount, value) {
-	var img = nativeImage.createFromDataURL(value);
+	const img = nativeImage.createFromDataURL(value);
 	mainWindow.setOverlayIcon(img, messageCount.toString());
 });
 
-ipcMain.on('getConfig', function (event, arg) {
+ipcMain.on('getConfig', function (event) {
 	event.returnValue = config.store;
 });
 
 ipcMain.on('setConfig', function (event, values) {
 	config.set(values);
 
-	// hide_menu_bar
 	mainWindow.setAutoHideMenuBar(values.hide_menu_bar);
 	if (!values.hide_menu_bar) mainWindow.setMenuBarVisibility(true);
-	// always_on_top
 	mainWindow.setAlwaysOnTop(values.always_on_top);
-	// auto_launch
-	values.auto_launch ? appLauncher.enable() : appLauncher.disable();
-	// systemtray_indicator
+	(values.auto_launch ? appLauncher.enable() : appLauncher.disable()).catch(function () {});
 	updateBadge(mainWindow.getTitle());
 
 	switch (values.window_display_behavior) {
@@ -349,75 +351,60 @@ ipcMain.on('validateMasterPassword', function (event, pass) {
 		createWindow();
 		mainMasterPasswordWindow.close();
 		event.returnValue = true;
+		return;
 	}
 	event.returnValue = false;
 });
 
-// Handle Service Notifications
+// Per-service notification permission
 ipcMain.on('setServiceNotifications', function (event, partition, op) {
 	session.fromPartition(partition).setPermissionRequestHandler(function (webContents, permission, callback) {
 		if (permission === 'notifications') return callback(op);
-		callback(true)
+		callback(true);
 	});
+});
+
+// Wipe cache and storage of a removed service
+ipcMain.on('clearServiceData', function (event, partition) {
+	const s = session.fromPartition(partition);
+	s.clearCache().catch(function () {});
+	s.clearStorageData().catch(function () {});
 });
 
 ipcMain.on('setDontDisturb', function (event, arg) {
 	config.set('dont_disturb', arg);
-})
+});
 
-// Reload app
-ipcMain.on('reloadApp', function (event) {
+ipcMain.on('reloadApp', function () {
 	mainWindow.reload();
 });
 
-// Relaunch app
-ipcMain.on('relaunchApp', function (event) {
+ipcMain.on('relaunchApp', function () {
 	app.relaunch();
 	app.exit(0);
 });
 
-// const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
-// 	// Someone tried to run a second instance, we should focus our window.
-// 	if (mainWindow) {
-// 		if (mainWindow.isMinimized()) mainWindow.restore();
-// 		mainWindow.focus();
-// 		mainWindow.show();
-// 		mainWindow.setSkipTaskbar(false);
-// 		if (app.dock && app.dock.show) app.dock.show();
-// 	}
-// });
-
-// if (shouldQuit) {
-// 	app.quit();
-// 	return;
-// }
-
-// Code for downloading images as temporal files
+// Download an image to a temporary file and open it
 // Credit: Ghetto Skype (https://github.com/stanfieldr/ghetto-skype)
 const tmp = require('tmp');
 const mime = require('mime');
-var imageCache = {};
+const imageCache = {};
 ipcMain.on('image:download', function (event, url, partition) {
 	let file = imageCache[url];
 	if (file) {
-		if (file.complete) {
-			shell.openItem(file.path);
-		}
-
+		if (file.complete) shell.openPath(file.path);
 		// Pending downloads intentionally do not proceed
 		return;
 	}
 
 	let tmpWindow = new BrowserWindow({
 		show: false
-		, webPreferences: {
-			partition: partition
-		}
+		, webPreferences: { partition: partition }
 	});
 
 	tmpWindow.webContents.session.once('will-download', (event, downloadItem) => {
 		imageCache[url] = file = {
-			path: tmp.tmpNameSync() + '.' + mime.extension(downloadItem.getMimeType())
+			path: tmp.tmpNameSync() + '.' + mime.getExtension(downloadItem.getMimeType())
 			, complete: false
 		};
 
@@ -425,7 +412,7 @@ ipcMain.on('image:download', function (event, url, partition) {
 		downloadItem.once('done', () => {
 			tmpWindow.destroy();
 			tmpWindow = null;
-			shell.openItem(file.path);
+			shell.openPath(file.path);
 			file.complete = true;
 		});
 	});
@@ -433,76 +420,52 @@ ipcMain.on('image:download', function (event, url, partition) {
 	tmpWindow.webContents.downloadURL(url);
 });
 
-// Hangouts
+// Hangouts photo albums
 ipcMain.on('image:popup', function (event, url, partition) {
-	let tmpWindow = new BrowserWindow({
+	const tmpWindow = new BrowserWindow({
 		width: mainWindow.getBounds().width
 		, height: mainWindow.getBounds().height
 		, parent: mainWindow
-		, icon: __dirname + '/../resources/Icon.ico'
+		, icon: path.join(__dirname, '..', 'resources', 'Icon.png')
 		, backgroundColor: '#FFF'
 		, autoHideMenuBar: true
 		, skipTaskbar: true
-		, webPreferences: {
-			partition: partition
-		}
+		, webPreferences: { partition: partition }
 	});
 
 	tmpWindow.maximize();
-
 	tmpWindow.loadURL(url);
 });
 
-ipcMain.on('toggleWin', function (event, allwaysShow) {
-	if (!mainWindow.isMinimized() && mainWindow.isMaximized() && mainWindow.isVisible()) { // Maximized
-		!allwaysShow ? mainWindow.close() : mainWindow.show();
-	} else if (mainWindow.isMinimized() && !mainWindow.isMaximized() && !mainWindow.isVisible()) { // Minimized
+ipcMain.on('toggleWin', function (event, alwaysShow) {
+	if (!mainWindow) return;
+	if (mainWindow.isMinimized()) {
 		mainWindow.restore();
-	} else if (!mainWindow.isMinimized() && !mainWindow.isMaximized() && mainWindow.isVisible()) { // Windowed mode
-		!allwaysShow ? mainWindow.close() : mainWindow.show();
-	} else if (mainWindow.isMinimized() && !mainWindow.isMaximized() && mainWindow.isVisible()) { // Closed to taskbar
-		mainWindow.restore();
-	} else if (!mainWindow.isMinimized() && mainWindow.isMaximized() && !mainWindow.isVisible()) { // Closed maximized to tray
-		mainWindow.show();
-	} else if (!mainWindow.isMinimized() && !mainWindow.isMaximized() && !mainWindow.isVisible()) { // Closed windowed to tray
-		mainWindow.show();
-	} else if (mainWindow.isMinimized() && !mainWindow.isMaximized() && !mainWindow.isVisible()) { // Closed minimized to tray
-		mainWindow.restore();
+	} else if (mainWindow.isVisible() && !alwaysShow) {
+		mainWindow.close();
 	} else {
 		mainWindow.show();
 	}
 });
 
-ipcMain.on('getDirName', function (e) {
-	e.returnValue = __dirname
-})
-
 // Proxy
 if (config.get('proxy')) app.commandLine.appendSwitch('proxy-server', config.get('proxyHost') + ':' + config.get('proxyPort'));
 
-// Disable GPU Acceleration for Linux
-// to prevent White Page bug
+// Disable GPU acceleration on Linux to prevent the white page bug
 // https://github.com/electron/electron/issues/6139
-// https://github.com/saenzramiro/rambox/issues/181
 if (config.get('disable_gpu')) app.disableHardwareAcceleration();
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
 app.on('ready', function () {
 	config.get('master_password') ? createMasterPasswordWindow() : createWindow();
 });
 
-// Quit when all windows are closed.
 app.on('window-all-closed', function () {
-	// On OS X it is common for applications and their menu bar
-	// to stay active until the user quits explicitly with Cmd + Q
+	// On macOS the app stays active until the user quits explicitly with Cmd + Q
 	if (process.platform !== 'darwin') {
 		app.quit();
 	}
 });
 
-// Only macOS: On OS X it's common to re-create a window in the app when the
-// dock icon is clicked and there are no other windows open.
 app.on('activate', function () {
 	if (mainWindow === null && mainMasterPasswordWindow === null) {
 		config.get('master_password') ? createMasterPasswordWindow() : createWindow();

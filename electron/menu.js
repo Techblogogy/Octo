@@ -4,7 +4,7 @@ const electron = require('electron');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 const shell = electron.shell;
-const appName = app.getName();
+const appName = app.name;
 
 function sendAction(action) {
 	const win = BrowserWindow.getAllWindows()[0];
@@ -17,7 +17,9 @@ function sendAction(action) {
 }
 
 module.exports = function(config) {
-	const locale = require('../resources/languages/'+config.get('locale'));
+	// Language files are plain scripts declaring `var locale = [...]`, not modules
+	const localeSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'resources', 'languages', config.get('locale') + '.js'), 'utf8');
+	const locale = new Function(localeSrc + ';return locale;')();
 	const helpSubmenu = [
 		{
 			label: `&GitHub`,
@@ -34,9 +36,7 @@ module.exports = function(config) {
 				{
 					label: `&Clear Cache`,
 					click(item, win) {
-						win.webContents.session.clearCache(function() {
-							win.reload();
-						});
+						win.webContents.session.clearCache().then(() => win.reload());
 					}
 				},
 				{
@@ -44,9 +44,7 @@ module.exports = function(config) {
 					click(item, win) {
 						win.webContents.session.clearStorageData({
 							storages: ['localstorage']
-						}, function() {
-							win.reload();
-						});
+						}).then(() => win.reload());
 					}
 				}
 			]
@@ -90,10 +88,10 @@ module.exports = function(config) {
 					,label: locale['menu.edit[5]']
 				},
 				{
-					role: 'pasteandmatchstyle'
+					role: 'pasteAndMatchStyle'
 				},
 				{
-					 role: 'selectall'
+					 role: 'selectAll'
 					,label: locale['menu.edit[6]']
 				},
 				{
@@ -124,13 +122,13 @@ module.exports = function(config) {
 					type: 'separator'
 				},
 				{
-					role: 'zoomin'
+					role: 'zoomIn'
 				},
 				{
-					role: 'zoomout'
+					role: 'zoomOut'
 				},
 				{
-					role: 'resetzoom'
+					role: 'resetZoom'
 				}
 			]
 		},
@@ -152,7 +150,7 @@ module.exports = function(config) {
 					type: 'separator'
 				},
 				{
-					 role: 'togglefullscreen'
+					 role: 'toggleFullScreen'
 					,label: locale['menu.view[2]']
 				},
 				{
@@ -214,7 +212,7 @@ module.exports = function(config) {
 				{
 					label: locale['menu.osx[2]'],
 					accelerator: 'Command+Alt+H',
-					role: 'hideothers'
+					role: 'hideOthers'
 				},
 				{
 					label: locale['menu.osx[3]'],

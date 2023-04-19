@@ -158,8 +158,7 @@ Ext.define('Rambox.view.main.MainController', {
 
 		// Clear all trash data
 		if ( rec.get('enabled') && tab.down('component').el ) {
-			tab.down('component').el.dom.getWebContents().session.clearCache(Ext.emptyFn);
-			tab.down('component').el.dom.getWebContents().session.clearStorageData({}, Ext.emptyFn);
+			ipc.send('clearServiceData', tab.down('component').el.dom.partition);
 		}
 
 		// Remove record from localStorage

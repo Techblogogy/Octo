@@ -11,7 +11,7 @@ Ext.define('Rambox.view.main.About', {
 	,height: 420
 	,bodyPadding: "10 25"
 	,data: {
-		 version: require('electron').remote.app.getVersion()
+		 version: ipc.sendSync('getVersion')
 		,platform: process.platform
 		,arch: process.arch
 		,electron: process.versions.electron

@@ -16,6 +16,13 @@ Ext.define('Rambox.ux.WebView',{
 	,zoomLevel: 0
 	,currentUnreadCount: 0
 
+	,statics: {
+		// <webview preload> needs an absolute file:// URL
+		preloadPath: function() {
+			return new URL('resources/js/rambox-service-api.js', window.location.href).href;
+		}
+	}
+
 	// CONFIG
 	,hideMode: 'offsets'
 	,initComponent: function(config) {
@@ -148,6 +155,36 @@ Ext.define('Rambox.ux.WebView',{
 		var me = this;
 
 		me.setUnreadCount(0);
+		if ( me.onNewWindow ) ipc.removeListener('webview:new-window', me.onNewWindow);
+	}
+
+	// Opens a service popup (calls, video) in an Ext window inside the app
+	,openInWindow: function(title, url) {
+		var me = this;
+
+		me.add({
+			 xtype: 'window'
+			,title: title
+			,width: '80%'
+			,height: '80%'
+			,maximizable: true
+			,resizable: true
+			,draggable: true
+			,collapsible: true
+			,items: {
+				 xtype: 'component'
+				,hideMode: 'offsets'
+				,autoRender: true
+				,autoShow: true
+				,autoEl: {
+					 tag: 'webview'
+					,src: url
+					,style: 'width:100%;height:100%;'
+					,partition: me.down('component').el.dom.partition
+					,useragent: Ext.getStore('ServicesList').getById(me.record.get('type')).get('userAgent')
+				}
+			}
+		}).show();
 	}
 
 	,webViewConstructor: function( enabled ) {
@@ -174,13 +211,11 @@ Ext.define('Rambox.ux.WebView',{
 					,src: me.record.get('url')
 					,style: 'width:100%;height:100%;visibility:visible;'
 					,partition: 'persist:' + me.record.get('type') + '_' + me.id.replace('tab_', '') + (localStorage.getItem('id_token') ? '_' + Ext.decode(localStorage.getItem('profile')).user_id : '')
-					,plugins: 'true'
 					,allowtransparency: 'on'
-					,autosize: 'on'
-					//,webpreferences: 'nodeIntegration=no'
-					//,disablewebsecurity: 'on' // Disabled because some services (Like Google Drive) dont work with this enabled
+					// The preload exposes window.rambox to the page, so it has to run in the page context
+					,webpreferences: 'contextIsolation=no,sandbox=no'
 					,useragent: Ext.getStore('ServicesList').getById(me.record.get('type')).get('userAgent')
-					,preload: './resources/js/rambox-service-api.js'
+					,preload: Rambox.ux.WebView.preloadPath()
 				}
 			}];
 
@@ -257,78 +292,36 @@ Ext.define('Rambox.ux.WebView',{
 			webview.setZoomLevel(me.record.get('zoomLevel'));
 		});
 
-		// Open links in default browser
-		webview.addEventListener('new-window', function(e) {
+		// Links and popups opened inside the service. The main process denies the
+		// window and reports it here (see did-attach-webview in electron/main.js).
+		me.onNewWindow = function(ev, webContentsId, url, disposition) {
+			try {
+				if ( webview.getWebContentsId() !== webContentsId ) return;
+			} catch (err) {
+				return; // not attached yet
+			}
+
 			switch ( me.type ) {
 				case 'skype':
 					// hack to fix multiple browser tabs on Skype link click, re #11
-					if ( e.url.match('https:\/\/web.skype.com\/..\/undefined') ) {
-						e.preventDefault();
-						return;
-					} else if ( e.url.indexOf('imgpsh_fullsize') >= 0 ) {
-						ipc.send('image:download', e.url, e.target.partition);
-						e.preventDefault();
+					if ( url.match('https:\/\/web.skype.com\/..\/undefined') ) return;
+					if ( url.indexOf('imgpsh_fullsize') >= 0 ) {
+						ipc.send('image:download', url, webview.partition);
 						return;
 					}
 					break;
 				case 'hangouts':
-					e.preventDefault();
-					if ( e.url.indexOf('plus.google.com/u/0/photos/albums') >= 0 ) {
-						ipc.send('image:popup', e.url, e.target.partition);
+					if ( url.indexOf('plus.google.com/u/0/photos/albums') >= 0 ) {
+						ipc.send('image:popup', url, webview.partition);
 						return;
-					} else if ( e.url.indexOf('https://hangouts.google.com/hangouts/_/CONVERSATION/') >= 0 ) {
-						me.add({
-							 xtype: 'window'
-							,title: 'Video Call'
-							,width: '80%'
-							,height: '80%'
-							,maximizable: true
-							,resizable: true
-							,draggable: true
-							,collapsible: true
-							,items: {
-								 xtype: 'component'
-								,hideMode: 'offsets'
-								,autoRender: true
-								,autoShow: true
-								,autoEl: {
-									 tag: 'webview'
-									,src: e.url
-									,style: 'width:100%;height:100%;'
-									,partition: 'persist:' + me.record.get('type') + '_' + me.id.replace('tab_', '') + (localStorage.getItem('id_token') ? '_' + Ext.decode(localStorage.getItem('profile')).user_id : '')
-									,useragent: Ext.getStore('ServicesList').getById(me.record.get('type')).get('userAgent')
-								}
-							}
-						}).show();
+					} else if ( url.indexOf('https://hangouts.google.com/hangouts/_/CONVERSATION/') >= 0 ) {
+						me.openInWindow('Video Call', url);
 						return;
 					}
 					break;
 				case 'slack':
-					if ( e.url.indexOf('slack.com/call/') >= 0 ) {
-						me.add({
-							 xtype: 'window'
-							,title: e.options.title
-							,width: e.options.width
-							,height: e.options.height
-							,maximizable: true
-							,resizable: true
-							,draggable: true
-							,collapsible: true
-							,items: {
-								 xtype: 'component'
-								,hideMode: 'offsets'
-								,autoRender: true
-								,autoShow: true
-								,autoEl: {
-									 tag: 'webview'
-									,src: e.url
-									,style: 'width:100%;height:100%;'
-									,partition: e.options.webPreferences.partition
-									,useragent: Ext.getStore('ServicesList').getById(me.record.get('type')).get('userAgent')
-								}
-							}
-						}).show();
-						e.preventDefault();
+					if ( url.indexOf('slack.com/call/') >= 0 ) {
+						me.openInWindow('Slack Call', url);
 						return;
 					}
 					break;
@@ -336,12 +329,13 @@ Ext.define('Rambox.ux.WebView',{
 					break;
 			}
 
-			const protocol = require('url').parse(e.url).protocol;
+			var protocol = '';
+			try { protocol = new URL(url).protocol; } catch (err) {}
 			if (protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:') {
-				e.preventDefault();
-				require('electron').shell.openExternal(e.url);
+				ipc.send('openExternalLink', url);
 			}
-		});
+		};
+		ipc.on('webview:new-window', me.onNewWindow);
 
 		webview.addEventListener('will-navigate', function(e, url) {
 			e.preventDefault();
@@ -377,22 +371,8 @@ Ext.define('Rambox.ux.WebView',{
 			// Scroll always to top (bug)
 			js_inject += 'document.body.scrollTop=0;';
 
-			// Handles Certificate Errors
-			webview.getWebContents().on('certificate-error', function(event, url, error, certificate, callback) {
-				if ( me.record.get('trust') ) {
-					event.preventDefault();
-					callback(true);
-				} else {
-					callback(false);
-				}
-
-				me.down('statusbar').keep = true;
-				me.down('statusbar').show();
-				me.down('statusbar').setStatus({
-					text: '<i class="fa fa-exclamation-triangle" aria-hidden="true"></i> Certification Warning'
-				});
-				me.down('statusbar').down('button').show();
-			});
+			// Self-signed certificates: the main process accepts them for trusted hosts
+			if ( me.record.get('trust') ) ipc.send('trustCertificate', me.src);
 
 			webview.executeJavaScript(js_inject);
 		});
@@ -437,7 +417,7 @@ Ext.define('Rambox.ux.WebView',{
 			}
 
 			function showWindowAndActivateTab(event) {
-				require('electron').remote.getCurrentWindow().show();
+				ipc.send('showWindow');
 				Ext.cq1('app-main').setActiveTab(me);
 			}
 		});
@@ -457,10 +437,6 @@ Ext.define('Rambox.ux.WebView',{
 				me.setUnreadCount(count);
 			});
 		}
-
-		webview.addEventListener('did-get-redirect-request', function( e ) {
-			if ( e.isMainFrame && me.record.get('type') === 'tweetdeck' ) Ext.defer(function() { webview.loadURL(e.newURL); }, 1000); // Applied a defer because sometimes is not redirecting. TweetDeck 2FA is an example.
-		});
 
 		webview.addEventListener('update-target-url', function( url ) {
 			me.down('statusbar #url').setText(url.url);
