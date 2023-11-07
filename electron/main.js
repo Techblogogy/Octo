@@ -164,7 +164,7 @@ function createWindow() {
 	// The frameless window has no menu bar; on macOS the application menu still
 	// provides the Edit shortcuts (copy / paste) and the About entry.
 	if (process.platform === 'darwin') {
-		Menu.setApplicationMenu(require('./menu')(config));
+		Menu.setApplicationMenu(require('./menu')());
 	} else {
 		mainWindow.setMenu(null);
 	}

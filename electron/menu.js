@@ -1,263 +1,100 @@
 'use strict';
-const os = require('os');
-const electron = require('electron');
-const app = electron.app;
-const BrowserWindow = electron.BrowserWindow;
-const shell = electron.shell;
-const appName = app.name;
+const { app, BrowserWindow, Menu, shell } = require('electron');
 
+// Sends an action to the renderer of the main window
 function sendAction(action) {
 	const win = BrowserWindow.getAllWindows()[0];
-
-	if (process.platform === 'darwin') {
-		win.restore();
-	}
-
+	if (!win) return;
+	if (process.platform === 'darwin') win.restore();
 	win.webContents.send(action);
 }
 
-module.exports = function(config) {
-	// Language files are plain scripts declaring `var locale = [...]`, not modules
-	const localeSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'resources', 'languages', config.get('locale') + '.js'), 'utf8');
-	const locale = new Function(localeSrc + ';return locale;')();
-	const helpSubmenu = [
-		{
-			label: `&GitHub`,
-			click() {
-				shell.openExternal('https://github.com/Techblogogy/Octo');
-			}
-		},
-		{
-			type: 'separator'
-		},
-		{
-			label: `&Tools`,
-			submenu: [
-				{
-					label: `&Clear Cache`,
-					click(item, win) {
-						win.webContents.session.clearCache().then(() => win.reload());
-					}
-				},
-				{
-					label: `&Clear Local Storage`,
-					click(item, win) {
-						win.webContents.session.clearStorageData({
-							storages: ['localstorage']
-						}).then(() => win.reload());
-					}
-				}
-			]
-		},
-		// {
-		// 	type: 'separator'
-		// },
-		// {
-		// 	label: `&`+locale['menu.help[3]'],
-		// 	click() {
-		// 		shell.openExternal('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=WU75QWS7LH2CA');
-		// 	}
-		// }
-	];
+module.exports = function () {
+	const isMac = process.platform === 'darwin';
 
-	let tpl = [
-		{
-			label: '&'+locale['menu.edit[0]'],
+	const template = [
+		...(isMac ? [{
+			label: app.name,
 			submenu: [
-				{
-					 role: 'undo'
-					,label: locale['menu.edit[1]']
-				},
-				{
-					 role: 'redo'
-					,label: locale['menu.edit[2]']
-				},
-				{
-					type: 'separator'
-				},
-				{
-					 role: 'cut'
-					,label: locale['menu.edit[3]']
-				},
-				{
-					 role: 'copy'
-					,label: locale['menu.edit[4]']
-				},
-				{
-					 role: 'paste'
-					,label: locale['menu.edit[5]']
-				},
-				{
-					role: 'pasteAndMatchStyle'
-				},
-				{
-					 role: 'selectAll'
-					,label: locale['menu.edit[6]']
-				},
-				{
-					role: 'delete'
-				}
+				{ label: 'About Octo', click: () => sendAction('showAbout') },
+				{ type: 'separator' },
+				{ label: 'Preferences', accelerator: 'Cmd+,', click: () => sendAction('showPreferences') },
+				{ type: 'separator' },
+				{ role: 'services' },
+				{ type: 'separator' },
+				{ role: 'hide' },
+				{ role: 'hideOthers' },
+				{ role: 'unhide' },
+				{ type: 'separator' },
+				{ role: 'quit' }
+			]
+		}] : [{
+			label: 'File',
+			submenu: [
+				{ label: 'Preferences', accelerator: 'Ctrl+,', click: () => sendAction('showPreferences') },
+				{ type: 'separator' },
+				{ role: 'quit' }
+			]
+		}]),
+		{
+			label: 'Edit',
+			submenu: [
+				{ role: 'undo' },
+				{ role: 'redo' },
+				{ type: 'separator' },
+				{ role: 'cut' },
+				{ role: 'copy' },
+				{ role: 'paste' },
+				{ role: 'pasteAndMatchStyle' },
+				{ role: 'delete' },
+				{ role: 'selectAll' }
 			]
 		},
 		{
-			label: '&'+locale['menu.view[0]'],
+			label: 'View',
 			submenu: [
 				{
-					label: '&'+locale['menu.view[1]'],
-					// accelerator: 'CmdOrCtrl+R',
+					label: 'Reload Octo',
 					accelerator: 'CmdOrCtrl+Shift+R',
-					click(item, focusedWindow) {
-						if (focusedWindow) focusedWindow.reload();
-					}
+					click: (item, focusedWindow) => { if (focusedWindow) focusedWindow.reload(); }
 				},
 				{
-					label: '&Reload current Service',
-					// accelerator: 'CmdOrCtrl+Shift+R',
+					label: 'Reload Current Service',
 					accelerator: 'CmdOrCtrl+R',
-					click() {
-						sendAction('reloadCurrentService');
-					}
+					click: () => sendAction('reloadCurrentService')
 				},
-				{
-					type: 'separator'
-				},
-				{
-					role: 'zoomIn'
-				},
-				{
-					role: 'zoomOut'
-				},
-				{
-					role: 'resetZoom'
-				}
+				{ type: 'separator' },
+				{ role: 'togglefullscreen' },
+				{ role: 'toggleDevTools' }
 			]
 		},
 		{
-			label: '&'+locale['menu.window[0]'],
+			label: 'Window',
 			role: 'window',
 			submenu: [
-				{
-					label: '&'+locale['menu.window[1]'],
-					accelerator: 'CmdOrCtrl+M',
-					role: 'minimize'
-				},
-				{
-					label: '&'+locale['menu.window[2]'],
-					accelerator: 'CmdOrCtrl+W',
-					role: 'close'
-				},
-				{
-					type: 'separator'
-				},
-				{
-					 role: 'toggleFullScreen'
-					,label: locale['menu.view[2]']
-				},
-				{
-					label: '&'+locale['menu.view[3]'],
-					accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-					click(item, focusedWindow) {
-						if (focusedWindow) focusedWindow.webContents.toggleDevTools();
-					}
-				}
+				{ role: 'minimize' },
+				{ role: 'close' },
+				...(isMac ? [{ type: 'separator' }, { role: 'front' }] : [])
 			]
 		},
 		{
-			label: '&'+locale['menu.help[4]'],
-			role: 'help'
+			label: 'Help',
+			role: 'help',
+			submenu: [
+				{ label: 'Octo on GitHub', click: () => shell.openExternal('https://github.com/Techblogogy/Octo') },
+				{ type: 'separator' },
+				{
+					label: 'Clear Cache',
+					click: (item, win) => { if (win) win.webContents.session.clearCache().then(() => win.reload()); }
+				},
+				{
+					label: 'Clear Local Storage',
+					click: (item, win) => { if (win) win.webContents.session.clearStorageData({ storages: ['localstorage'] }).then(() => win.reload()); }
+				},
+				...(isMac ? [] : [{ type: 'separator' }, { label: 'About Octo', click: () => sendAction('showAbout') }])
+			]
 		}
 	];
 
-	if (process.platform === 'darwin') {
-		tpl.unshift({
-			label: appName,
-			submenu: [
-				{
-					label: locale['preferences[0]'],
-					click() {
-						sendAction('showPreferences')
-					}
-				},
-				// {
-				// 	label: locale['menu.help[5]'],
-				// 	click(item, win) {
-				// 		const webContents = win.webContents;
-				// 		const send = webContents.send.bind(win.webContents);
-				// 		send('autoUpdater:check-update');
-				// 	}
-				// },
-				{
-					// label: locale['menu.help[6]'],
-					label: "About Octo",
-					click() {
-						sendAction('showAbout')
-					}
-				},
-				{
-					type: 'separator'
-				},
-				{
-					label: locale['menu.osx[0]'],
-					role: 'services',
-					submenu: []
-				},
-				{
-					type: 'separator'
-				},
-				{
-					label: locale['menu.osx[1]'],
-					accelerator: 'Command+H',
-					role: 'hide'
-				},
-				{
-					label: locale['menu.osx[2]'],
-					accelerator: 'Command+Alt+H',
-					role: 'hideOthers'
-				},
-				{
-					label: locale['menu.osx[3]'],
-					role: 'unhide'
-				},
-				{
-					type: 'separator'
-				},
-				{
-					role: 'quit',
-					label: locale['tray[1]']
-				}
-			]
-		});
-	} else {
-		tpl.unshift({
-			label: '&'+locale['menu.file[0]'],
-			submenu: [
-				{
-					label: locale['preferences[0]'],
-					click() {
-						sendAction('showPreferences')
-					}
-				},
-				{
-					type: 'separator'
-				},
-				{
-					role: 'quit',
-					label: locale['menu.file[1]']
-				}
-			]
-		});
-		helpSubmenu.push({
-			type: 'separator'
-		});
-		helpSubmenu.push({
-			label: `&`+locale['menu.help[6]'],
-			click() {
-				sendAction('showAbout')
-			}
-		});
-	}
-
-	tpl[tpl.length - 1].submenu = helpSubmenu;
-
-	return electron.Menu.buildFromTemplate(tpl);
+	return Menu.buildFromTemplate(template);
 };
