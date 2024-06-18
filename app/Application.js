@@ -5,6 +5,8 @@ Ext.define('Rambox.Application', {
 
 	,requires: [
 		 'Rambox.util.MD5'
+		,'Rambox.view.main.About'
+		,'Rambox.view.preferences.Preferences'
 		,'Ext.window.Toast'
 		,'Ext.util.Cookies'
 	]

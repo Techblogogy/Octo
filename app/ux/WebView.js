@@ -10,6 +10,7 @@ Ext.define('Rambox.ux.WebView',{
 		 'Rambox.util.Format'
 		,'Rambox.util.Notifier'
 		,'Rambox.util.UnreadCounter'
+		,'Ext.ux.statusbar.StatusBar'
 	]
 
 	// private
@@ -21,6 +22,7 @@ Ext.define('Rambox.ux.WebView',{
 		preloadPath: function() {
 			return new URL('resources/js/rambox-service-api.js', window.location.href).href;
 		}
+
 	}
 
 	// CONFIG
