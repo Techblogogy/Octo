@@ -56,3 +56,24 @@ $highlight-color: #0F92FE;
 .bottomMask .x-mask-msg-text {
 	background-image: url(../ext/packages/ext-theme-crisp/build/resources/images/loadmask/loading.gif);
 }
+
+// Tabs: no borders, service icons scaled into the icon box instead of cropped
+.x-tab-default,
+.x-tab-bar-default,
+.x-tab-bar-body-default { border-width: 0 !important; }
+.x-tab-default .x-tab-icon-el {
+	background-size: 24px 24px !important;
+	background-position: center !important;
+}
+
+// Services page: flat sections, no panel / dataview borders
+.main-panel,
+.main-panel .x-panel,
+.main-panel .x-panel-body,
+.main-panel .x-panel-header,
+.main-panel .service-group-ctr,
+.settings-panel .x-panel,
+.settings-panel .x-panel-body,
+.settings-panel .x-grid-body,
+.settings-panel .x-grid-item { border-width: 0 !important; }
+.main-type-title { border-bottom: 0 !important; }

@@ -23,6 +23,12 @@ Ext.define('Rambox.ux.WebView',{
 			return new URL('resources/js/rambox-service-api.js', window.location.href).href;
 		}
 
+		// The running Chromium's user agent without the Electron and app tokens:
+		// several services refuse to load (or block sign-in) when they see them.
+		,userAgent: function(service) {
+			if ( service && service.get('userAgent') ) return service.get('userAgent');
+			return navigator.userAgent.replace(/ ?Electron\/\S+/i, '').replace(/ ?octo\/\S+/i, '');
+		}
 	}
 
 	// CONFIG
@@ -183,7 +189,7 @@ Ext.define('Rambox.ux.WebView',{
 					,src: url
 					,style: 'width:100%;height:100%;'
 					,partition: me.down('component').el.dom.partition
-					,useragent: Ext.getStore('ServicesList').getById(me.record.get('type')).get('userAgent')
+					,useragent: Rambox.ux.WebView.userAgent(Ext.getStore('ServicesList').getById(me.record.get('type')))
 				}
 			}
 		}).show();
@@ -216,7 +222,7 @@ Ext.define('Rambox.ux.WebView',{
 					,allowtransparency: 'on'
 					// The preload exposes window.rambox to the page, so it has to run in the page context
 					,webpreferences: 'contextIsolation=no,sandbox=no'
-					,useragent: Ext.getStore('ServicesList').getById(me.record.get('type')).get('userAgent')
+					,useragent: Rambox.ux.WebView.userAgent(Ext.getStore('ServicesList').getById(me.record.get('type')))
 					,preload: Rambox.ux.WebView.preloadPath()
 				}
 			}];

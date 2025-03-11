@@ -89,9 +89,9 @@
     }
   },
   "devDependencies": {
-    "electron": "^31.0.0",
-    "electron-builder": "^24.13.3",
-    "sass": "^1.77.0"
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8",
+    "sass": "^1.85.0"
   },
   "dependencies": {
     "auto-launch": "^5.0.5",
