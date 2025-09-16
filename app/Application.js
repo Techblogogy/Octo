@@ -16,11 +16,6 @@ Ext.define('Rambox.Application', {
 		,'Services'
 	]
 
-	,profiles: [
-		 'Offline'
-		,'Online'
-	]
-
 	,config: {
 		 totalServicesLoaded: 0
 		,totalNotifications: 0
@@ -225,15 +220,15 @@ Ext.define('Rambox.Application', {
 		newValue = parseInt(newValue);
 		if ( newValue > 0 )	{
 			if ( Ext.cq1('app-main').getActiveTab().record ) {
-				document.title = 'Rambox (' + Rambox.util.Format.formatNumber(newValue) + ') - '+Ext.cq1('app-main').getActiveTab().record.get('name');
+				document.title = 'Octo (' + Rambox.util.Format.formatNumber(newValue) + ') - '+Ext.cq1('app-main').getActiveTab().record.get('name');
 			} else {
-				document.title = 'Rambox (' + Rambox.util.Format.formatNumber(newValue) + ')';
+				document.title = 'Octo (' + Rambox.util.Format.formatNumber(newValue) + ')';
 			}
 		} else {
 			if ( Ext.cq1('app-main') && Ext.cq1('app-main').getActiveTab().record ) {
-				document.title = 'Rambox - '+Ext.cq1('app-main').getActiveTab().record.get('name');
+				document.title = 'Octo - '+Ext.cq1('app-main').getActiveTab().record.get('name');
 			} else {
-				document.title = 'Rambox';
+				document.title = 'Octo';
 			}
 		}
 	}
