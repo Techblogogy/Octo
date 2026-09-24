@@ -14,11 +14,7 @@ ipc.on('showAbout', function(event, message) {
 	!Ext.cq1('about') ? Ext.create('Rambox.view.main.About') : '';
 });
 ipc.on('showPreferences', function(event, message) {
-	// !Ext.cq1('preferences') ? Ext.create('Rambox.view.preferences.Preferences').show() : '';
-	// Ext.cq1('app-main')
-	const stgTab = Ext.cq1('app-main').getComponent('setTab');
-	Ext.cq1('app-main').setActiveTab(stgTab)
-
+	if ( !Ext.cq1('preferences') ) Ext.cq1('app-main').getController().openPreferences();
 });
 // Set Badge in taskbar for Windows
 ipc.on('setBadge', function(event, messageCount) {

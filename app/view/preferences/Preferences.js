@@ -81,19 +81,7 @@ Ext.define('Rambox.view.preferences.Preferences',{
 									]
 								})
 							}
-							,{
-								 xtype: 'button'
-								,text: 'Help us Translate'
-								,style: 'border-top-left-radius:0;border-bottom-left-radius:0;'
-								,href: 'https://crowdin.com/project/rambox/invite'
-							}
 						]
-					}
-					,{
-						 xtype: 'label'
-						,text: 'English is the only language that has full translation. We are working with all the others, help us!'
-						,style: 'display:block;font-size:10px;line-height:15px;'
-						,margin: '0 0 10 0'
 					}
 					,{
 						 xtype: 'checkbox'
